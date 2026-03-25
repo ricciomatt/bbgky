@@ -19,20 +19,14 @@ def mk_obj(N:int, n:int,**kwargs)->BBGKY:
     )
 if __name__ == '__main__':
     D = {2:range(50, 105, 5), 3:range(25,75,5), 4:range(10,50,5)}
-    O = mk_obj(10,2, Nsteps = 5_000, renorm = True)
-    for o in tqdm.tqdm(O):
-        pass
-    plt = PlotIt()
-    plt.extend_data(*(dict(x = O.dt.t[:-1], y = O.oneBodyRenyiEntropy(A = A)[:,0]) for A in range(O.N)))
-    plt.show()
     for n, rng in zip(D.keys(), D.values()):
         for N in rng:
+            tc = time.time()
             O = mk_obj(N, n)
             t0 = time.time()
-            print(O)
             for o in tqdm.tqdm(O):
                 pass
             dt = time.time() - t0
             with open(os.path.join(os.getcwd(), 'log.txt'), 'a') as file:
-                file.write("Time for {BB}: {dt:.2e} s\n".format(BB=str(O), dt = dt))
+                file.write("Time for {BB}: Time to compute Index Contractions: {dtc:.2e}, Time to Solve: {dt:.2e} s\n".format(BB=str(O), dt = dt, dtc = tc - t0))
     pass
