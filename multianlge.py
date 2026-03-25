@@ -13,7 +13,7 @@ def mk_obj(N:int, n:int,**kwargs)->BBGKY:
     a.update(kwargs)
     return BBGKY(
         N=N, n=n, 
-        data_storage_loc=os.path.join('BBGKYSims', f'BBGKY_{N}-{n}'), angular_dependence='random_uniform',
+        data_storage_loc=os.path.join('BBGKYMuliAngleSims', f'BBGKY_{N}-{n}'), angular_dependence='random_uniform',
         **a
     )
 if __name__ == '__main__':
