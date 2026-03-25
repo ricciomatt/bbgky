@@ -9,8 +9,7 @@ import plotly.io as pio
 
 
 def mk_obj(N:int, n:int,**kwargs)->BBGKY:
-    print(N,n)
-    a = dict(Nsteps= int(4500), u0 = 10_000*1e2, tgt_u0 = 5, debug=False, load_data=False, dp = .1, p0 = torch.tensor(1e10), method = 'gaussrk', adaptive_epsilon=5e-3, dt  = 1e-2, adaptive_time_step=True, r0_Rv = 7.5, p_start_f = .1)
+    a = dict(Nsteps= int(4500), u0 = 10_000*1e2, tgt_u0 = 5, debug=False, load_data=False, dp = .1, p0 = torch.tensor(1e10), method = 'fullrk', adaptive_epsilon=5e-3, dt  = 1e-2, adaptive_time_step=True, r0_Rv = 7.5, p_start_f = .1)
     a.update(kwargs)
     return BBGKY(
         N=N, n=n, 
@@ -18,7 +17,7 @@ def mk_obj(N:int, n:int,**kwargs)->BBGKY:
         **a
     )
 if __name__ == '__main__':
-    D = {2:range(50, 105, 5), 3:range(25,75,5), 4:range(10,50,5)}
+    D = {2:range(100, 120, 5), 3:range(35,75,5), 4:range(10,20,5)}
     for n, rng in zip(D.keys(), D.values()):
         for N in rng:
             tc = time.time()
