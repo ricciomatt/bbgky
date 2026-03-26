@@ -6,6 +6,7 @@ import time
 import tqdm
 from plotly import graph_objects as go 
 import plotly.io as pio
+import numpy as np
 
 
 def mk_obj(N:int, n:int,**kwargs)->BBGKY:
@@ -14,18 +15,24 @@ def mk_obj(N:int, n:int,**kwargs)->BBGKY:
     return BBGKY(
         N=N, n=n, 
         data_storage_loc=os.path.join('BBGKYMuliAngleSims', f'BBGKY_{N}-{n}'), angular_dependence='random_uniform',
+        timeit=True,
         **a
     )
 if __name__ == '__main__':
-    D = {2:range(100, 120, 5), 3:range(35,75,5), 4:range(10,20,5)}
-    for n, rng in zip(D.keys(), D.values()):
-        for N in rng:
-            tc = time.time()
-            O = mk_obj(N, n)
-            t0 = time.time()
-            for o in tqdm.tqdm(O):
-                pass
-            dt = time.time() - t0
-            with open(os.path.join(os.getcwd(), 'log.txt'), 'a') as file:
-                file.write("Time for {BB}: Time to compute Index Contractions: {dtc:.2e}, Time to Solve: {dt:.2e} s\n".format(BB=str(O), dt = dt, dtc = tc - t0))
-    pass
+    n = int(input('n: '))
+    N = int(input('N: '))
+    tc = time.time()
+    O = mk_obj(N, n)
+    t0 = time.time()
+    for o in tqdm.tqdm(O):
+        pass
+    dt = time.time() - t0
+    with open(os.path.join(O.data_loc, 'log.txt'), 'w') as file:
+        file.write("Time for {BB}: Time to compute Index Contractions: {dtc:.2e}, Time to Solve: {dt:.2e} s\n".format(BB=str(O), dt = dt, dtc = tc - t0))
+    try:
+        with open(os.path.join(O.data_loc, 'times.dat', 'w')) as file:
+            np.array(O.delta_t, dtype = np.float64).tofile(file)
+    except:
+        np.array(O.delta_t, dtype=np.float64).tofile(os.path.join(O.data_loc, 'times.dat'))
+    
+
