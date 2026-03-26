@@ -1,7 +1,7 @@
 import qunum.numerical as qn
 from qunum.jupyter_tools.plotting import PlotIt
 from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.bbgky import BBGKYDecoupling as BBGKY
-import os, torch
+import os, torch,sys
 import time
 import tqdm
 from plotly import graph_objects as go 
@@ -19,8 +19,8 @@ def mk_obj(N:int, n:int,**kwargs)->BBGKY:
         **a
     )
 if __name__ == '__main__':
-    n = int(input('n: '))
-    N = int(input('N: '))
+    n = int(sys.argv[1])
+    N = int(sys.argv[2])
     tc = time.time()
     O = mk_obj(N, n)
     t0 = time.time()
