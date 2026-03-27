@@ -7,6 +7,8 @@ import tqdm
 from plotly import graph_objects as go 
 import plotly.io as pio
 import numpy as np
+import polars as pl
+
 
 
 def mk_obj(N:int, n:int, angular_dependence = 'random_uniform', **kwargs)->tuple[BBGKY, int]:
@@ -27,6 +29,9 @@ def mk_obj(N:int, n:int, angular_dependence = 'random_uniform', **kwargs)->tuple
     ), i 
 if __name__ == '__main__':
     print(sys.argv, 'Running')
+    print(os.cpu_count())
+    os.environ["POLARS_MAX_THREADS"] = str((min(os.cpu_count(), 32)))
+    print(pl.thread_pool_size())
     try:
         n = int(sys.argv[1])
     except:
