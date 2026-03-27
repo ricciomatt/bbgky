@@ -9,22 +9,24 @@ import plotly.io as pio
 import numpy as np
 
 
-def mk_obj(N:int, n:int,**kwargs)->tuple[BBGKY, int]:
+def mk_obj(N:int, n:int, angular_dependence = 'random_uniform', **kwargs)->tuple[BBGKY, int]:
     a = dict(Nsteps= int(4500), u0 = 10_000*1e2, tgt_u0 = 5, debug=False, load_data=False, dp = .1, p0 = torch.tensor(1e10), method = 'fullrk', adaptive_epsilon=5e-3, dt  = 1e-2, adaptive_time_step=True, r0_Rv = 7.5, p_start_f = .1)
     a.update(kwargs)
     i = 0
     while True:
-        path = os.path.join('BBGKYMuliAngleSims', f'BBGKY_{N}-{n}_{i}')
+        path = os.path.join('BBGKYSims', f'BBGKY_{N}-{n}_{i}_{angular_dependence}')
         if not (os.path.exists(path)):
             break
         i+=1
+    print(path)
     return BBGKY(
         N=N, n=n, 
-        data_storage_loc=path, angular_dependence='random_uniform',
+        data_storage_loc=path,angular_dependence=angular_dependence,
         timeit=True,
         **a
     ), i 
 if __name__ == '__main__':
+    print(sys.argv, 'Running')
     try:
         n = int(sys.argv[1])
     except:
@@ -35,8 +37,9 @@ if __name__ == '__main__':
         N = 100
     
     tc = time.time()
-    O, i = mk_obj(N, n)
+    O, i = mk_obj(N, n, angular_dependence = 'random_uniform')
     t0 = time.time()
+    print('Created object in time: {dt}'.format(dt = t0 - tc))
     for o in tqdm.tqdm(O):
         pass
     dt = time.time() - t0
