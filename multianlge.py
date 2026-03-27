@@ -30,7 +30,10 @@ def mk_obj(N:int, n:int, angular_dependence = 'random_uniform', **kwargs)->tuple
 if __name__ == '__main__':
     print(sys.argv, 'Running')
     print(os.cpu_count())
-    os.environ["POLARS_MAX_THREADS"] = str((min(os.cpu_count(), 32)))
+    try:
+        os.environ["POLARS_MAX_THREADS"] = str((min(os.cpu_count(), int(sys.argv[-1]))))
+    except:
+        os.environ["POLARS_MAX_THREADS"] = str((min(os.cpu_count(), 8)))
     print(pl.thread_pool_size())
     try:
         n = int(sys.argv[1])
