@@ -14,9 +14,10 @@ if __name__ == '__main__':
     tc = time.time()
     N = kwargs["N"]
     n = kwargs['n']
-    if not os.path.exists(os.path.join(os.getcwd(), f"BBGKY{N}-{n}/indexmap")):
-        CMap(N=N, n= n, maps_loc=f"BBGKY{N}-{n}/indexmap")
-    O = mk_obj(map_loc = f'BBGKY{N}-{n}/indexmap', **kwargs)
+    r = int(kwargs['r0_Rv'])
+    if not os.path.exists(os.path.join(os.getcwd(), f"BBGKY{N}-{n}-{r}/indexmap")):
+        CMap(N=N, n= n, maps_loc=f"BBGKY{N}-{n}-{r}/indexmap")
+    O = mk_obj(map_loc = f'BBGKY{N}-{n}-{r}/indexmap', **kwargs)
     t0 = time.time()
     print('Creation time {dt:.2e}s'.format(dt =  t0-tc))
     status = 'Completed'
