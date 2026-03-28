@@ -8,7 +8,7 @@ from plotly import graph_objects as go
 import plotly.io as pio
 import numpy as np
 import polars as pl
-
+import argparse
 
 
 def mk_obj(N:int, n:int, angular_dependence = 'random_uniform', **kwargs)->tuple[BBGKY, int]:
@@ -16,7 +16,7 @@ def mk_obj(N:int, n:int, angular_dependence = 'random_uniform', **kwargs)->tuple
     a.update(kwargs)
     i = 0
     while True:
-        path = os.path.join('BBGKYSims', f'BBGKY_{N}-{n}_{i}_{angular_dependence}')
+        path = os.path.join('BBGKYSims{N}-{n}', f'{i}_{angular_dependence}')
         if not (os.path.exists(path)):
             break
         i+=1
@@ -45,10 +45,13 @@ if __name__ == '__main__':
         N = 100
     
     tc = time.time()
-    O, i = mk_obj(N, n, angular_dependence = 'random_uniform')
+    O, i = mk_obj(N, n, angular_dependence = 'random_uniform', renorm = False, adaptive_epsilon=1e-3)
     t0 = time.time()
     print('Created object in time: {dt}'.format(dt = t0 - tc))
-    for o in tqdm.tqdm(O):
+    for i, o in tqdm.tqdm(enumerate(O)):
+        if(o.isnan().any()):
+            print(i, o)
+            breakpoint(0)
         pass
     dt = time.time() - t0
     with open(os.path.join(O.data_loc, f'log_{i}.txt'), 'w') as file:
