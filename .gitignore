@@ -2,6 +2,7 @@ BBGKYSims/
 BBGKY*/
 index*/
 log.txt
+*log*
 bin/
 include/python3.12/
 pyvenv.cfg
