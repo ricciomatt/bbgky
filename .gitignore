@@ -6,6 +6,7 @@ log.txt
 bin/
 include/python3.12/
 pyvenv.cfg
+MAPS*/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

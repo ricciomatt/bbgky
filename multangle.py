@@ -1,9 +1,12 @@
 import sys, os, tqdm,time, numpy as np
 from core import mk_obj
 from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core import CMap
-
+import pickle
 if __name__ == '__main__':
-    kwargs = dict(N = 100, n = 2, Nsteps = 4500, adaptive_epsilon = 1e-3, renorm = False, I = 0)
+    kwargs = dict(N = 100, n = 2, Nsteps = 5_000, adaptive_epsilon = 1e-3, renorm = False, I = 0)
+    d = pickle.load(open('configs.pkl','rb'))
+    kwargs['r0_Rv'] = d['r0_Rv']
+    kwargs['u0_tgt'] = None
     print(sys.argv)
     for arg in sys.argv[1:]:
         key, val = arg.split('=')
@@ -17,6 +20,7 @@ if __name__ == '__main__':
     t0 = time.time()
     print('Creation time {dt:.2e}s'.format(dt =  t0-tc))
     status = 'Completed'
+    print(O.u(0))
     for i, o in tqdm.tqdm(enumerate(O)):
         if(o.isnan().any()):
             print(i, o)
