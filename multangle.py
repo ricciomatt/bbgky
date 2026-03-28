@@ -3,7 +3,7 @@ from core import mk_obj
 from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core import CMap
 
 if __name__ == '__main__':
-    kwargs = dict(N = 100, n = 100, Nsteps = 4500, adaptive_epsilon = 1e-3, renorm = False, I = 0)
+    kwargs = dict(N = 100, n = 2, Nsteps = 4500, adaptive_epsilon = 1e-3, renorm = False, I = 0)
     print(sys.argv)
     for arg in sys.argv[1:]:
         key, val = arg.split('=')
@@ -12,7 +12,7 @@ if __name__ == '__main__':
     N = kwargs["N"]
     n = kwargs['n']
     if not os.path.exists(os.path.join(os.getcwd(), f"BBGKY{N}-{n}/indexmap")):
-        CMap(N=N, n= n, maps_loc=f"BBGKY{N}-{N}/indexmap")
+        CMap(N=N, n= n, maps_loc=f"BBGKY{N}-{n}/indexmap")
     O = mk_obj(map_loc = f'BBGKY{N}-{n}/indexmap', **kwargs)
     t0 = time.time()
     print('Creation time {dt:.2e}s'.format(dt =  t0-tc))
