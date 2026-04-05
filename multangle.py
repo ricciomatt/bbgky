@@ -1,16 +1,15 @@
 import sys, os, tqdm,time, numpy as np
-from core import mk_obj
+from core import mk_obj, unpack_script_args
 from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core import CMap
 import pickle
 if __name__ == '__main__':
-    kwargs = dict(N = 100, n = 2, Nsteps = 5_000, adaptive_epsilon = 1e-3, renorm = False, I = 0)
+    kwargs = dict(N = 100, n = 2, Nsteps = 5_000, adaptive_epsilon = 1e-3, dt = 5e-3, renorm = False, I = 0)
     d = pickle.load(open('configs.pkl','rb'))
     kwargs['r0_Rv'] = d['r0_Rv']
-    kwargs['u0_tgt'] = None
-    print(sys.argv)
-    for arg in sys.argv[1:]:
-        key, val = arg.split('=')
-        kwargs[key] = int(val)
+    kwargs['tgt_u0'] = None
+    print(kwargs)
+    kwargs = unpack_script_args(sys.argv, **kwargs)
+    print(kwargs)
     tc = time.time()
     N = kwargs["N"]
     n = kwargs['n']
@@ -22,6 +21,7 @@ if __name__ == '__main__':
     print('Creation time {dt:.2e}s'.format(dt =  t0-tc))
     status = 'Completed'
     print(O.u(0))
+    print({l:j.shape for l,j in O.Norm.items()})
     for i, o in tqdm.tqdm(enumerate(O)):
         if(o.isnan().any()):
             print(i, o)
@@ -29,7 +29,7 @@ if __name__ == '__main__':
             break
         pass
     dt = time.time() - t0
-    with open(os.path.join(O.data_loc, f'log_{i}.txt'), 'w') as file:
+    with open(os.path.join(O.data_loc, f'log_{kwargs["I"]}.txt'), 'w') as file:
         file.write("Status:{status}\nNsteps Taken = {n} computed in {dt:.2e}\nFOR {BB}\nCreation Time {dtc}".format(status = status, n = O.n, BB=str(O), dt = dt, dtc = tc - t0))
     try:
         with open(os.path.join(O.data_loc, 'times.dat', 'w')) as file:
