@@ -3,7 +3,7 @@ from core import mk_obj, unpack_script_args
 from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core import CMap
 import pickle
 if __name__ == '__main__':
-    kwargs = dict(N = 100, n = 2, Nsteps = 5_000, adaptive_epsilon = 1e-3, dt = 5e-3, renorm = False, I = 0)
+    kwargs = dict(N = 100, n = 2, Nsteps = 5_000, adaptive_epsilon = 1e-3, dt = 5e-3, renorm = False, I = 0, conserve_Jz = True)
     d = pickle.load(open('configs.pkl','rb'))
     kwargs['r0_Rv'] = d['r0_Rv']
     kwargs['tgt_u0'] = None
@@ -21,7 +21,6 @@ if __name__ == '__main__':
     print('Creation time {dt:.2e}s'.format(dt =  t0-tc))
     status = 'Completed'
     print(O.u(0))
-    print({l:j.shape for l,j in O.Norm.items()})
     for i, o in tqdm.tqdm(enumerate(O)):
         if(o.isnan().any()):
             print(i, o)

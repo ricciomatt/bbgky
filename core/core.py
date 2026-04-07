@@ -1,7 +1,7 @@
 import qunum.numerical as qn
 from qunum.jupyter_tools.plotting import PlotIt
 from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.bbgky import BBGKYDecoupling as BBGKY
-import os, torch, time, numpy as np, polars as pl, subprocess, re, copy
+import os, torch, time, numpy as np, polars as pl, subprocess, re, copy, glob
 from typing import Any
 def mk_obj(N:int = 100, n:int = 100, I:int = 0, r0_Rv:float = 7.5, angular_dependence = 'random_uniform', map_loc:str|None = None, load_map:bool = True, **kwargs)->BBGKY:
     a = dict(
@@ -26,6 +26,57 @@ def mk_obj(N:int = 100, n:int = 100, I:int = 0, r0_Rv:float = 7.5, angular_depen
         timeit=True,
         **a
     )
+def load_obj(
+        N:int = 100, 
+        n:int = 100, 
+        I:int = 0,  
+        r0_Rv:int = 4,
+        take_input:bool = True,
+        angular_dependence = 'random_uniform', 
+        map_loc:str|None = None, 
+        load_map:bool = True, 
+        **kwargs
+    )->BBGKY:
+    a = dict(
+        Nsteps= int(4500), 
+        u0 = 10_000*1e2, tgt_u0 = 5, 
+        debug=False, 
+        dp = .1, p0 = torch.tensor(1e10), method = 'fullrk', 
+        adaptive_epsilon=5e-3, dt  = 1e-2, adaptive_time_step=True, p_start_f = .1
+    )
+    import glob
+
+    path = glob.glob(f'./BBGKY{N}-{n}*')
+    if(take_input):
+        print('\n'.join(map(lambda x: f'{x[0]}) {x[1]}', enumerate(path))))
+        ix = input('Which dir? ') 
+        ix = 0 if ix == '' else int(ix)
+        print()
+        path = glob.glob(os.path.join(path[ix], 'Data', f'*_{angular_dependence}'))
+        print('\n'.join(map(lambda x: f'{x[0]}) {x[1]}', enumerate(path))))
+        ix = input('Which dir? ') 
+        ix = 0 if ix == '' else int(ix)
+        path = path[ix]
+    else:
+        path = os.path.join(f"BBGKY{N}-{n}-{int(r0_Rv)}/Data", f'{I}_{angular_dependence}')
+    assert os.path.exists(path), FileNotFoundError(f'No File at {path}')
+    for key, val in kwargs.items():
+        a[key] = val
+    if not (os.path.exists(path)):
+        os.makedirs(path)
+    return BBGKY(
+        N=N, 
+        n=n, 
+        load_data= True,
+        data_storage_loc = path,
+        maps_loc= map_loc, 
+        load_maps=load_map,
+        angular_dependence=angular_dependence,
+        r0_Rv=r0_Rv,
+        timeit=True,
+        **a
+    )
+
 
 def run_job(n:int = 2, N:int = 100, Nsteps:int = 5000, sl_time:float = 60, Nproc:int = 5, tot_proc:int = 100, **kwargs):
     procs = dict()
