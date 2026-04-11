@@ -1,7 +1,7 @@
 import qunum.numerical as qn
 from qunum.jupyter_tools.plotting import PlotIt
 from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.bbgky import BBGKYDecoupling as BBGKY
-import os, torch, time, numpy as np, polars as pl, subprocess, re, copy, glob
+import os, torch, time, numpy as np, polars as pl, subprocess, re, copy, glob, datetime , tqdm
 from typing import Any
 def mk_obj(N:int = 100, n:int = 100, I:int = 0, r0_Rv:float = 7.5, angular_dependence = 'random_uniform', map_loc:str|None = None, load_map:bool = True, **kwargs)->BBGKY:
     a = dict(
@@ -79,33 +79,52 @@ def load_obj(
 
 
 def run_job(n:int = 2, N:int = 100, Nsteps:int = 5000, sl_time:float = 60, Nproc:int = 5, tot_proc:int = 100, **kwargs):
+    print(N,n,sl_time)
     procs = dict()
     i = 0 
-    path = os.path.join(os.getcwd(), f'logs_{N}-{n}')
+    path = os.path.join(os.getcwd(), 'logs')
     if not (os.path.exists(path)):
         os.mkdir(path)
-    done_= 0
-    print('\rProgress [{A}]'.format(A = ''.join(map(lambda x: ['.','#'][int(bool(x in done_))], range(tot_proc)))))
+    done = 0
     t0 = time.time()
     completed_procs = {}
-    Nt = tot_proc/20
-    while i < tot_proc:
-        print('\rTotal Compute Time:{B:.2e}s\tProgress [{A}'.format(B = time.time()-t0, A = ''.join(map(lambda x: ['.','#'][int(len(done_)>=x*Nt-1)], range(1,21)))), end = "]") 
-        for j in range(len(procs), Nproc):
-            with open(f'{path}/log{i}.log', 'w') as file:
-                temp = subprocess.Popen(['python3', 'multangle.py', f'n={n}', f'N={N}', f'Nsteps={Nsteps}', f'I={i}'], stdout=file, stderr=file, text=True)
-            procs[i] = dict(proc = temp, pid=temp.pid, i=i, t = time.time())
-            print(f'Initialized {i}')
-            i+=1
-        time.sleep(sl_time)
+    def init_proc(i:int = i):
+        with open(f'{path}/log_{i}_{time.time()}.log', 'w') as file:
+            temp = subprocess.Popen(['python3', 'multangle.py', f'n={n}', f'N={N}', f'Nsteps={Nsteps}', f'I={i}', *(f"{key}={val}" for key,val in kwargs.items())], stdout=file, stderr=file, text=True)
+        return temp 
+    def monitor(procs:dict[dict], done:int, completed_procs:dict[dict], C:int)->tuple[dict[dict], int, dict[dict], float]:
         del_ = set()
         for pid, proc in procs.items():
             if(proc['proc'].poll() is not None):
-                del_.add(i)
-                done+=i
+                del_.add(pid)
+                done += 1
+                pbar.update(1)
+            else:
+                procs[pid]['cycles']+=1
         for d in del_:
-            completed_procs[i] = copy.copy(proc[d])
+            completed_procs[i] = copy.copy(procs[d])
+            completed_procs[i]['tf'] = time.time()
             del procs[d]
+        if(len(del_) != 0):
+            C = sum(comp['cycles'] for comp in completed_procs.values())/done
+        pbar.set_description(f'Spawned {i}/100 Avg Num Cycles = {C}')
+        return procs, done, completed_procs, C
+    done = 0
+    C = 0
+    with tqdm.tqdm(total = tot_proc, desc = f'Spawned {i}/100 Avg Num Cycles = {C}', ncols = 80 ) as pbar:
+        while i < tot_proc:
+            for j in range(len(procs), Nproc):
+                temp = init_proc(i=i)
+                procs[i] = dict(proc = temp, pid=temp.pid, i=i, t = time.time(), cycles= 0)
+                i+=1
+                pbar.set_description(f'Spawned {i}/100 Avg Num Cycles = {C}')
+            time.sleep(sl_time)
+            procs,done,completed_procs, C= monitor(procs=procs, done = done, completed_procs=completed_procs, C = C)
+        while len(procs) != 0:
+            time.sleep(sl_time)
+            procs,done,completed_procs, C = monitor(procs=procs, done = done, completed_procs = completed_procs, C = C)
+            
+
     print('\n\n Completed iterations')
     return 
 
