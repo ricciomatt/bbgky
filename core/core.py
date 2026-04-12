@@ -148,32 +148,33 @@ def unpack_script_args(inp_args:list[str], **kwargs:dict[str:Any])->dict[str:Any
 
 
 def run_single_job(args:tuple[int, int, int, int, int, dict]):
-    n, N, Nsteps, i, max_cores, kwargs = args
-    path = os.path.join(os.getcwd(), 'logs')
+    n, N, Nsteps, i, max_cores, path, kwargs = args
     log_file = f"{path}/log_{i}_{int(time.time())}.log"
     # Construct the command
     cmd = ['python3', 'multangle.py', f'n={n}', f'N={N}', f'Nsteps={Nsteps}', f'I={i}', *(f"{key}={val}" for key,val in dict(kwargs).items())]
     env = os.environ.copy()
-    env["OMP_NUM_THREADS"] = "8" 
-    env["MKL_NUM_THREADS"] = "8"
+    env["OMP_NUM_THREADS"] = f"{max_cores}" 
+    env["MKL_NUM_THREADS"] = f"{max_cores}"
     with open(log_file, 'w') as f:
         # We use run() here because the Executor handles the parallelism
         result = subprocess.run(cmd, stdout=f, stderr=f, text=True, env=env)
     return i, result.returncode
 
-def run_job_par(tgt_path:None|str=None, n:int=2, N:int=100, Nsteps:int=5000, Nproc:int=5, tot_proc:int=100, I0:int = 0, **kwargs:dict):
+def run_job_par(tgt_path:None|str=None, n:int=2, N:int=100, Nsteps:int=5000, Nproc:int=5, tot_proc:int=100, I0:int = 0, max_cores:int|None = None, **kwargs:dict):
     if(tgt_path is None):
         tgt_path = os.getcwd()
     else:
-        if( not os.path.exists(tgt_path)):
+        if(not os.path.exists(tgt_path)):
+            print(tgt_path)
             os.makedirs(tgt_path)
+
     path = os.path.join(tgt_path, 'logs')
     if not os.path.exists(path):
         os.mkdir(path)
     # Prepare task arguments
-    max_cores =  os.cpu_count() // Nproc
-    tasks = [(n, N, Nsteps, i+I0, max_cores, kwargs) for i in range(tot_proc)]
-    print(f"Starting {tot_proc} jobs using {Nproc} workers...")
+    max_cores =  min(max_cores if max_cores is not None else os.cpu_count(), os.cpu_count())
+    tasks = [(n, N, Nsteps, i+I0, max_cores, path, kwargs) for i in range(tot_proc)]
+    print(f"Starting {tot_proc} jobs using {Nproc} workers with {max_cores} cores per worker...")
     with tqdm.tqdm(total=tot_proc, desc="Computing", unit="job", ncols=100) as pbar:
         with ProcessPoolExecutor(max_workers=Nproc) as executor:
             future_to_job = {executor.submit(run_single_job, task): task for task in tasks}
