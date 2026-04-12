@@ -3,6 +3,8 @@ from qunum.jupyter_tools.plotting import PlotIt
 from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.bbgky import BBGKYDecoupling as BBGKY
 import os, torch, time, numpy as np, polars as pl, subprocess, re, copy, glob, datetime , tqdm
 from typing import Any
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
 def mk_obj(N:int = 100, n:int = 100, I:int = 0, r0_Rv:float = 7.5, angular_dependence = 'random_uniform', map_loc:str|None = None, load_map:bool = True, **kwargs)->BBGKY:
     a = dict(
         Nsteps= int(4500), 
@@ -143,3 +145,41 @@ def unpack_script_args(inp_args:list[str], **kwargs:dict[str:Any])->dict[str:Any
             if(mt):
                 kwargs[key] = val
     return kwargs
+
+
+def run_single_job(args:tuple[int, int, int, int, int, dict]):
+    n, N, Nsteps, i, max_cores, kwargs = args
+    path = os.path.join(os.getcwd(), 'logs')
+    log_file = f"{path}/log_{i}_{int(time.time())}.log"
+    # Construct the command
+    cmd = ['python3', 'multangle.py', f'n={n}', f'N={N}', f'Nsteps={Nsteps}', f'I={i}', *(f"{key}={val}" for key,val in dict(kwargs).items())]
+    env = os.environ.copy()
+    env["OMP_NUM_THREADS"] = "8" 
+    env["MKL_NUM_THREADS"] = "8"
+    with open(log_file, 'w') as f:
+        # We use run() here because the Executor handles the parallelism
+        result = subprocess.run(cmd, stdout=f, stderr=f, text=True, env=env)
+    return i, result.returncode
+
+def run_job_par(tgt_path:None|str=None, n:int=2, N:int=100, Nsteps:int=5000, Nproc:int=5, tot_proc:int=100, I0:int = 0, **kwargs:dict):
+    if(tgt_path is None):
+        tgt_path = os.getcwd()
+    else:
+        if( not os.path.exists(tgt_path)):
+            os.makedirs(tgt_path)
+    path = os.path.join(tgt_path, 'logs')
+    if not os.path.exists(path):
+        os.mkdir(path)
+    # Prepare task arguments
+    max_cores =  os.cpu_count() // Nproc
+    tasks = [(n, N, Nsteps, i+I0, max_cores, kwargs) for i in range(tot_proc)]
+    print(f"Starting {tot_proc} jobs using {Nproc} workers...")
+    with tqdm.tqdm(total=tot_proc, desc="Computing", unit="job", ncols=100) as pbar:
+        with ProcessPoolExecutor(max_workers=Nproc) as executor:
+            future_to_job = {executor.submit(run_single_job, task): task for task in tasks}
+            for future in as_completed(future_to_job):
+                job_id, return_code = future.result()
+                pbar.update(1)
+                if return_code != 0:
+                    print(f"Job {job_id} failed with code {return_code}")
+    print('\nCompleted all iterations.')
