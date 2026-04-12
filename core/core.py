@@ -1,7 +1,7 @@
 import qunum.numerical as qn
 from qunum.jupyter_tools.plotting import PlotIt
 from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.bbgky import BBGKYDecoupling as BBGKY
-import os, torch, time, numpy as np, polars as pl, subprocess, re, copy, glob, datetime , tqdm
+import os, torch, time, numpy as np, polars as pl, subprocess, re, copy, glob, datetime , tqdm, sys
 from typing import Any
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
@@ -151,7 +151,7 @@ def run_single_job(args:tuple[int, int, int, int, int, dict]):
     n, N, Nsteps, i, max_cores, path, kwargs = args
     log_file = f"{path}/log_{i}_{int(time.time())}.log"
     # Construct the command
-    cmd = ['python3', 'multangle.py', f'n={n}', f'N={N}', f'Nsteps={Nsteps}', f'I={i}', *(f"{key}={val}" for key,val in dict(kwargs).items())]
+    cmd = [sys.executable, 'multangle.py', f'n={n}', f'N={N}', f'Nsteps={Nsteps}', f'I={i}', *(f"{key}={val}" for key,val in dict(kwargs).items())]
     env = os.environ.copy()
     env["OMP_NUM_THREADS"] = f"{max_cores}" 
     env["MKL_NUM_THREADS"] = f"{max_cores}"
