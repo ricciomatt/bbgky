@@ -1,9 +1,11 @@
 import sys, os, tqdm,time, numpy as np
 from core import mk_obj, unpack_script_args
 from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core import CMap
+
+from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation import BBGKYDecoupling
 import pickle
 if __name__ == '__main__':
-    kwargs = dict(N = 100, n = 2, Nsteps = 5_000, adaptive_epsilon = 1e-3, dt = 5e-3, renorm = False, I = 0, conserve_Jz = True)
+    kwargs = dict(tgt_path = None, N = 100, n = 2, Nsteps = 5_000, adaptive_epsilon = 1e-3, dt = 5e-3, renorm = False, I = 0, conserve_Jz = True, memmap_maps = True, memmap_tensors = True)
     d = pickle.load(open('configs.pkl','rb'))
     kwargs['r0_Rv'] = d['r0_Rv']
     kwargs['tgt_u0'] = None
@@ -14,7 +16,7 @@ if __name__ == '__main__':
     N = kwargs["N"]
     n = kwargs['n']
     r = int(kwargs['r0_Rv'])
-    if not os.path.exists(os.path.join(os.getcwd(), f"BBGKY{N}-{n}-{r}/indexmap")):
+    if not os.path.exists(os.path.join(os.getcwd(), f"BBGKY{N}-{n}-{r}/indexmap")) and kwargs['memmap_mapsss']:
         CMap(N=N, n= n, maps_loc=f"BBGKY{N}-{n}-{r}/indexmap")
     O = mk_obj(map_loc = f'BBGKY{N}-{n}-{r}/indexmap', **kwargs)
     t0 = time.time()

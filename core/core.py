@@ -4,8 +4,12 @@ from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.bbgky import BB
 import os, torch, time, numpy as np, polars as pl, subprocess, re, copy, glob, datetime , tqdm, sys
 from typing import Any
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from torch import Tensor
+import pickle, gc
 
-def mk_obj(N:int = 100, n:int = 100, I:int = 0, r0_Rv:float = 7.5, angular_dependence = 'random_uniform', map_loc:str|None = None, load_map:bool = True, **kwargs)->BBGKY:
+def mk_obj(tgt_path:str|None = None, N:int = 100, n:int = 100, I:int = 0, r0_Rv:float = 7.5, angular_dependence = 'random_uniform', map_loc:str|None = None, load_map:bool = True, **kwargs)->BBGKY:
+    if(tgt_path is None):
+        tgt_path = os.getcwd()
     a = dict(
         Nsteps= int(4500), 
         u0 = 10_000*1e2, tgt_u0 = 5, 
@@ -15,14 +19,13 @@ def mk_obj(N:int = 100, n:int = 100, I:int = 0, r0_Rv:float = 7.5, angular_depen
     )
     for key, val in kwargs.items():
         a[key] = val
-    path = os.path.join(f"BBGKY{N}-{n}-{int(r0_Rv)}/Data", f'{I}_{angular_dependence}')
+    path = os.path.join(tgt_path, f"BBGKY{N}-{n}-{int(r0_Rv)}/Data", f'{I}_{angular_dependence}')
     if not (os.path.exists(path)):
         os.makedirs(path)
-    print(path)
     return BBGKY(
         N=N, n=n, 
         data_storage_loc = path,
-        maps_loc= map_loc, load_maps=load_map,
+        maps_loc = map_loc, load_maps=load_map,
         angular_dependence=angular_dependence,
         r0_Rv=r0_Rv,
         timeit=True,
@@ -147,11 +150,11 @@ def unpack_script_args(inp_args:list[str], **kwargs:dict[str:Any])->dict[str:Any
     return kwargs
 
 
-def run_single_job(args:tuple[int, int, int, int, int, dict]):
-    n, N, Nsteps, i, max_cores, path, kwargs = args
+def run_single_job(args:tuple[int, int, int, int, str, str, dict]):
+    n, N, Nsteps, i, max_cores, path, tgt_path, kwargs = args
     log_file = f"{path}/log_{i}_{int(time.time())}.log"
     # Construct the command
-    cmd = [sys.executable, 'multangle.py', f'n={n}', f'N={N}', f'Nsteps={Nsteps}', f'I={i}', *(f"{key}={val}" for key,val in dict(kwargs).items())]
+    cmd = [sys.executable, 'multangle.py', f'n={n}', f'N={N}', f'Nsteps={Nsteps}', f'I={i}', f"tgt_path={tgt_path}", *(f"{key}={val}" for key,val in dict(kwargs).items())]
     env = os.environ.copy()
     env["OMP_NUM_THREADS"] = f"{max_cores}" 
     env["MKL_NUM_THREADS"] = f"{max_cores}"
@@ -173,7 +176,7 @@ def run_job_par(tgt_path:None|str=None, n:int=2, N:int=100, Nsteps:int=5000, Npr
         os.mkdir(path)
     # Prepare task arguments
     max_cores =  min(max_cores if max_cores is not None else os.cpu_count(), os.cpu_count())
-    tasks = [(n, N, Nsteps, i+I0, max_cores, path, kwargs) for i in range(tot_proc)]
+    tasks = [(n, N, Nsteps, i+I0, max_cores, path, tgt_path, kwargs) for i in range(tot_proc)]
     print(f"Starting {tot_proc} jobs using {Nproc} workers with {max_cores} cores per worker...")
     with tqdm.tqdm(total=tot_proc, desc="Computing", unit="job", ncols=100) as pbar:
         with ProcessPoolExecutor(max_workers=Nproc) as executor:
@@ -184,3 +187,107 @@ def run_job_par(tgt_path:None|str=None, n:int=2, N:int=100, Nsteps:int=5000, Npr
                 if return_code != 0:
                     print(f"Job {job_id} failed with code {return_code}")
     print('\nCompleted all iterations.')
+
+
+
+def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:int=100, Nsteps:int=5000, Nproc:int=5, tot_proc:int=100, I0:int = 0, max_cores:int|None = None, **kwargs:dict):
+    if(tgt_path is None):
+        tgt_path = os.getcwd()
+        tmp_path = os.path.join(tgt_path,'temp')
+    else:
+        os.path.join(tgt_path,'temp')
+        if(not os.path.exists(tgt_path)):
+            print(tgt_path)
+            os.makedirs(tgt_path)
+        tmp_path = os.path.join(tgt_path,'temp')
+        if(not os.path.exists(tmp_path)):
+            print(tmp_path)
+            os.makedirs(tmp_path)
+    if(log_path is None):
+        log_path = os.getcwd()
+    else:
+        os.path.join(log_path,'temp')
+        if(not os.path.exists(tgt_path)):
+            print(tgt_path)
+            os.makedirs(tgt_path)
+    path = os.path.join(log_path, 'logs')
+    if not os.path.exists(path):
+        os.makedirs(path)
+    # Prepare task arguments
+    max_cores =  min(max_cores if max_cores is not None else os.cpu_count(), os.cpu_count())
+    tasks = {i:(n, N, Nsteps, i%Nproc, max_cores, path, tmp_path, kwargs) for i in range(tot_proc)}
+    data_path = os.path.join(tmp_path, 'Data')
+    if not os.path.exists(data_path):
+        os.makedirs(data_path, exist_ok=True)
+        PhiBar = np.memmap(os.path.join(data_path, 'PhiBar.dat'), dtype = np.float64, mode = 'w+')
+        GammaBar = np.memmap(os.path.join(data_path, 'GammaBar.dat'), dtype = np.float64, mode='w+')
+        PhiBar[...] = 0
+        GammaBar[...] = 0 
+    else:
+        try:
+            PhiBar = np.memmap(os.path.join(data_path, 'PhiBar.dat'), dtype = np.float64, mode = 'r+')
+        except:
+            PhiBar = np.memmap(os.path.join(data_path, 'PhiBar.dat'), dtype = np.float64, mode = 'w+')
+        try:
+            GammaBar = np.memmap(os.path.join(data_path, 'GammaBar.dat'), dtype = np.float64, mode='r+')
+        except:
+            GammaBar = np.memmap(os.path.join(data_path, 'GammaBar.dat'), dtype = np.float64, mode='w+')
+    print(f"Starting {tot_proc} jobs using {Nproc} workers with {max_cores} cores per worker...")
+    with tqdm.tqdm(total=tot_proc, desc="Computing", unit="job", ncols=100) as pbar:
+        with ProcessPoolExecutor(max_workers=Nproc) as executor:
+            future_to_job = {executor.submit(run_single_job_get_data, task): task for key, task in tasks.items()}
+            for future in as_completed(future_to_job):
+                job_id, return_code, Phi, Gamma = future.result()
+                pbar.update(1)
+                if return_code != 0:
+                    print(f"Job {job_id} failed with code {return_code}")
+                else:
+                    PhiBar+=Phi
+                    GammaBar+=Gamma
+                    del Phi; del Gamma
+                    gc.collect()
+    print('\nCompleted all iterations. Storing Data')
+    out_path = os.path.join(tgt_path, 'data')
+    if(os.path.exists(out_path)):
+        os.makedirs(out_path)
+        with open(os.path.join(out_path,'Nshots.pkl'), 'rb') as file :
+            T = pickle.load(file)
+        PhiBar = torch.from_numpy(PhiBar.copy())
+        GammaBar = torch.from_numpy(GammaBar.copy())
+        with open(os.path.join(out_path,'PhiBar.dat'), 'rb') as file:
+            PhiBar += torch.load(file)*T
+        with open(os.path.join(out_path,'GammaBar.dat'), 'rb') as file:
+            GammaBar += torch.load(file)*T
+        tot_proc+=T
+        PhiBar/=tot_proc
+        GammaBar/=tot_proc
+    else:
+        os.makedirs(out_path)
+        PhiBar = torch.from_numpy(PhiBar.copy())/tot_proc
+        GammaBar = torch.from_numpy(GammaBar.copy())/tot_proc
+    with open(os.path.join(out_path,'Nshots.pkl'), 'wb') as file :
+        pickle.dump(tot_proc, file)
+    with open(os.path.join(out_path, 'PhiBar.dat'), 'wb') as file: 
+        torch.save(Phi,file) 
+    with open(os.path.join(out_path, 'GammaBar.dat'), 'wb') as file: 
+        torch.save(Phi,file)
+    print(f'Data saved at {out_path}')
+    print(f'Removing data at {tmp_path}')
+    os.removedirs(tmp_path)
+    return
+
+def run_single_job_get_data(args:tuple[int, int, int, int,str, str, dict])->tuple[int,int, Tensor, Tensor]:
+    n, N, Nsteps, i, max_cores, path, tgt_path, kwargs = args
+    log_file = f"{path}/log_{i}_{int(time.time())}.log"
+    # Construct the command
+    cmd = [sys.executable, 'multangle.py', f'n={n}', f'N={N}', f'Nsteps={Nsteps}', f'I={i}', *(f"{key}={val}" for key,val in dict(kwargs).items())]
+    env = os.environ.copy()
+    env["OMP_NUM_THREADS"] = f"{max_cores}" 
+    env["MKL_NUM_THREADS"] = f"{max_cores}"
+    with open(log_file, 'w') as f:
+        # We use run() here because the Executor handles the parallelism
+        result = subprocess.run(cmd, stdout=f, stderr=f, text=True, env=env)
+    Phi = np.memmap(os.path.join(tgt_path,f'/BBGKY{N}-{n}-4/Data/random_uniform_{i}/Phi(t).dat'), dtype = np.float64, mode='r+', shape = (Nsteps, N, pow(n,2)-1)).copy()
+    D = N*(pow(n,2)-1)
+    Gamma = np.memmap(os.path.join(tgt_path,f'/BBGKY{N}-{n}-4/Data/random_uniform_{i}/Gamma(t).dat'), dtype = np.float64, mode = 'r+', shape = (Nsteps,int(pow(D,2)*(1-1/N)/2))).copy()
+    return i, result.returncode, Phi, Gamma
