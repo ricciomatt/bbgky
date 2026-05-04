@@ -333,3 +333,28 @@ def plot_ptrans(
     plt.to_image(os.path.join(plot_path, 'PhaseTransition.png'))
     
 
+from math import sqrt as msqrt
+from qunum.numerical.physics.quantum.operators.dense.nuetrino import pmns2, pmns3
+from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core.core import pmnsrotPhi
+def plot_flav(PhiBar:torch.Tensor, sun:SUConnection, plt:PlotIt, t:torch.Tensor , path_base:str, N:int)->None:
+    Pz = pmnsrotPhi(PhiBar, sun)[...,]
+    plt.reset()
+    color = ['rgba(255,0,0,.5)', 'rgba(0,0,255,.5)']
+    color_Bar = ['rgb(0,0,0)', 'rgb(100,50,150)']
+    dash = ['dot','dash']
+    for m, k in enumerate((torch.arange(2,sun.n+1).pow(2)-2)):
+        plt.extend_data(*(
+            dict(
+                x = t, y = Pz[...,i,k].real, 
+                marker=dict(color = color[m]), line = dict(width = 5), 
+                showlegend = bool(i<1), 
+                name = f'$\\huge \\Phi_{{A{str(k)}}}$'
+            ) for i in range(N)
+        ))
+        plt.add_data(
+            x = t, y = Pz[...,k].real.mean(-1), 
+            marker=dict(color = color_Bar[m]), line = dict(width = 10, dash = dash[m]), 
+            showlegend = True, name = f'$\\huge \\bar{{\\Phi}}_{k}$'
+        )
+    plt.to_image(os.path.join(path_base, 'Pz'))
+    return 
