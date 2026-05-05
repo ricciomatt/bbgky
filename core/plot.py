@@ -251,14 +251,13 @@ def plot_ptrans(
     )->None:
     
     plt.reset()
-    plt.subplot_grid(ncols=1, nrows=4, spacingr=.1, leg_opts=dict(bordercolor="black", borderwidth=3))
+    plt.subplot_grid(ncols=1, nrows=4, spacingr=.05, leg_opts=dict(bordercolor="black", borderwidth=3))
     
     plt.add_data(
         x = t, y = PhiBar.real.mean(1).pow(2).sum(-1).real, 
         marker = dict(color = 'blue'), line = dict(width = 4, dash = 'solid'),
         yaxis = 'y3', xaxis = 'x3',  legend = 'legend3',
-        name = '$\\huge \\bar{\\Phi}_a\\bar{\\Phi}^a$', legendgroup = 'A', 
-        legendgrouptitle_text = '$\\huge \\textbf{Order Parameter}$', showlegend = True, 
+        name = '$\\huge \\bar{\\Phi}_a\\bar{\\Phi}^a$', legendgroup = 'A', showlegend = True, 
     )
 
 
@@ -281,7 +280,7 @@ def plot_ptrans(
                 x = t, y =  S[:,i],
                 xaxis = 'x2', yaxis = 'y2', legend = 'legend2',
                 line = dict(width = 10, dash = 'solid'), marker = dict(color = 'rgba(255,0,0,.25)',),
-                showlegend = bool(i == 0), name = '$\\huge S_{2,A}$',legendgroup = 'S', legendgrouptitle_text = "$\\huge \\alpha = 2 \\textbf{Entropy}$"
+                showlegend = bool(i == 0), name = '$\\huge S_{2,A}$',legendgroup = 'S', 
             ) for i in range(N )
         )
     )
@@ -303,7 +302,7 @@ def plot_ptrans(
                 xaxis = 'x', yaxis = 'y', legend = 'legend',
                 line = dict(width = 10, dash = 'solid'), marker = dict(color = 'rgba(255,0,0,.25)',),
                 showlegend = bool(i == 0), name = '$\\huge \\mathcal{M}_{4,A}$',legendgroup = 'M', 
-                legendgrouptitle_text = "$\\huge \\alpha = 4 \\textbf{ Magic}$"
+                
             ) for i in range(N )
         )
     )
