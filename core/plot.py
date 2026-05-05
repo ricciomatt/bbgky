@@ -347,7 +347,7 @@ def plot_ptrans(
         height = 2500, width = 2000, 
         title = dict(
             text = r'$\huge \textbf{Dynamical Phase Transition  around  the  effective Daul Point}(\mu_{(t)} \sim |\bar{B}|)$',
-            yref= 'paper', y = .975
+            yref= 'paper', 
         ),
         yaxis = dict(title = dict(text = r"$\huge \mathcal{M}_{4,A}$")),
         yaxis2= dict(title = dict(text = r"$\huge S_{2,A}$")),
