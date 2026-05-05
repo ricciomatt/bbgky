@@ -244,7 +244,7 @@ def plot_non_local(
             yref='paper',
             font = dict(size= 30),
             x = plt.layout[f'xaxis{key}']['domain'][0],
-            y = plt.layout[f'yaxis{key}']['domain'][1]+.015,
+            y = plt.layout[f'yaxis{key}']['domain'][1],
             xanchor = 'left',
             yanchor = 'top',
         )
