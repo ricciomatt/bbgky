@@ -312,6 +312,34 @@ def plot_ptrans(
         line = dict(width = 7.5, dash='solid'), marker=dict(color='black'),
         showlegend = True, name = '$\\huge \\bar{\\mathcal{M}}_{4}$', legendgroup = 'M'
     )
+    titles = {
+        '4':r'$\huge\text{Energy Scales}$', 
+        '3':r'$\huge\text{Order Parameter}$', 
+        '2':r'$\huge\text{Entropy Evolution}$',
+        '':r'$\huge\text{Magic Evolution}$',
+    } 
+    annotations = [
+        dict(
+            text=val,
+            xref='paper',
+            yref='paper',
+            font = dict(size= 30),
+            x = plt.layout[f'xaxis{key}']['domain'][0],
+            y = plt.layout[f'yaxis{key}']['domain'][1]+.015,
+            xanchor = 'left',
+            yanchor = 'top',
+        )
+        for key, val in titles.items()
+    ]
+    shapes = [
+        dict(
+        type= 'line', xref= 'x4', yref= 'paper', 
+        x0 = (t[:-1][(PhiBar.mean(1).pow(2).sum(-1).real < 1-1e-3)][0]), 
+        x1 = (t[:-1][(PhiBar.mean(1).pow(2).sum(-1).real < 1-1e-3)][0]),
+        y0 =0, y1 = plt.layout['yaxis']['domain'][1], line = dict(color = 'rgb(255,0,0)', width = 5, dash = 'dot'), 
+        name = '$\\huge \\text{Dynamical Phase Point}$', legend = 'legend4', showlegend = True
+        )
+    ]
     plt.update_layout(
         height = 2500, width = 2000, 
         title = dict(
@@ -331,6 +359,11 @@ def plot_ptrans(
         legend = dict(title = dict(text = r"One-Body Magic"), font = dict(size = 25)),
         legend2 = dict(title = dict(text = r"One-Body Entropy"), font = dict(size = 25)),
         legend3 = dict(title = dict(text = r"Order Paramter"), font = dict(size = 25)),
+        legend4 = dict(title = dict(text = r"Energy Scales"), font = dict(size = 25)),
+
+        shapes = shapes,
+        annotations = annotations
+    
         
     )
 
