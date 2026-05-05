@@ -332,7 +332,6 @@ def plot_ptrans(
         for key, val in titles.items()
     ]
     ix = (PhiBar.mean(1).pow(2).sum(-1).real < 1-1e-3)
-    print(ix.shape)
     time = (t[:-1][ix][0])
     shapes = [
         dict(
