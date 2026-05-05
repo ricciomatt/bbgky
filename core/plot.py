@@ -356,13 +356,13 @@ def plot_flav(PhiBar:torch.Tensor, sun:SUConnection, plt:PlotIt, t:torch.Tensor 
                 x = t, y = Pz[...,i,k].real, 
                 marker=dict(color = color[m]), line = dict(width = 5), 
                 showlegend = bool(i<1), 
-                name = f'$\\huge \\Phi_{{A{str(k)}}}$'
+                name = f'$\\huge \\Phi_{{A{str(int(k))}}}$'
             ) for i in range(N)
         ))
         plt.add_data(
             x = t, y = Pz[...,k].real.mean(-1), 
             marker=dict(color = color_Bar[m]), line = dict(width = 10, dash = dash[m]), 
-            showlegend = True, name = f'$\\huge \\bar{{\\Phi}}_{k}$'
+            showlegend = True, name = f'$\\huge \\bar{{\\Phi}}_{str(int(k))}$'
         )
     plt.update_layout(
         xaxis = dict(title = dict(text = r'$\huge {t(\omega_{0}^{-1})}$')),
