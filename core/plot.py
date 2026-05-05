@@ -333,16 +333,16 @@ def plot_ptrans(
     ]
     ix = (PhiBar.mean(1).pow(2).sum(-1).real < 1-1e-3)
     print(ix.shape)
-    print(t[:-1][ix][0])
+    time = (t[:-1][ix][0])
     shapes = [
         dict(
         type= 'line', xref= 'x4', yref= 'paper', 
-        x0 = (t[:-1][ix][0]), 
-        x1 = (t[:-1][ix][0]),
-        y0 =plt.layout[f'yaxis{t}']['domain'][0], y1 = plt.layout[f'yaxis{t}']['domain'][1], line = dict(color = 'rgb(255,0,0)', width = 5, dash = 'dot'), 
+        x0 = time, 
+        x1 = time,
+        y0 =plt.layout[f'yaxis{tit}']['domain'][0], y1 = plt.layout[f'yaxis{tit}']['domain'][1], line = dict(color = 'rgb(255,0,0)', width = 5, dash = 'dot'), 
         name = '$\\huge \\text{Dynamical Phase Point}$', legend = 'legend4', showlegend = True
         )
-        for t in titles
+        for tit in titles
     ]
     plt.update_layout(
         height = 2500, width = 2000, 
