@@ -336,9 +336,10 @@ def plot_ptrans(
         type= 'line', xref= 'x4', yref= 'paper', 
         x0 = (t[:-1][(PhiBar.mean(1).pow(2).sum(-1).real < 1-1e-3)][0]), 
         x1 = (t[:-1][(PhiBar.mean(1).pow(2).sum(-1).real < 1-1e-3)][0]),
-        y0 =0, y1 = plt.layout['yaxis']['domain'][1], line = dict(color = 'rgb(255,0,0)', width = 5, dash = 'dot'), 
+        y0 =plt.layout[f'yaxis{t}']['domain'][0], y1 = plt.layout[f'yaxis{t}']['domain'][1], line = dict(color = 'rgb(255,0,0)', width = 5, dash = 'dot'), 
         name = '$\\huge \\text{Dynamical Phase Point}$', legend = 'legend4', showlegend = True
         )
+        for t in titles
     ]
     plt.update_layout(
         height = 2500, width = 2000, 
