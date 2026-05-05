@@ -339,7 +339,7 @@ def plot_ptrans(
         x0 = time, 
         x1 = time,
         y0 =plt.layout[f'yaxis{tit}']['domain'][0], y1 = plt.layout[f'yaxis{tit}']['domain'][1], line = dict(color = 'rgb(255,0,0)', width = 5, dash = 'dot'), 
-        name = '$\\huge \\text{Dynamical Phase Point}$', legend = 'legend4', showlegend = bool(tit == '')
+        name = r'$\huge \text{Dual Point}$', legend = 'legend4', showlegend = bool(tit == '')
         )
         for tit in titles
     ]
@@ -352,7 +352,7 @@ def plot_ptrans(
         yaxis = dict(title = dict(text = r"$\huge \mathcal{M}_{4,A}$")),
         yaxis2= dict(title = dict(text = r"$\huge S_{2,A}$")),
         yaxis3= dict(title = dict(text = r"$\huge \bar{\Phi}_{a}\bar{\Phi}^{a}$")),
-        yaxis4= dict(title = dict(text = r"$\huge Energy Scale$")),
+        yaxis4= dict(title = dict(text = r"$\huge \text{Energy Scale}s$")),
 
         xaxis = dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
         xaxis2= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
