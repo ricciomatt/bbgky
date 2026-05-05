@@ -251,9 +251,7 @@ def plot_ptrans(
     )->None:
     
     plt.reset()
-    ydm = np.linspace(0,1,5)
-    plt.subplot_grid(ncols=1, nrows=4, spacingr=.1, leg_opts=dict(y=ydm[1]-.05, yanchor="top",x=1,xanchor="left", bordercolor="black", borderwidth=3))
-    
+    plt.subplot_grid(ncols=1, nrows=4, spacingr=.1, leg_opts=dict(bordercolor="black", borderwidth=3))
     
     plt.add_data(
         x = t, y = PhiBar.real.mean(1).pow(2).sum(-1).real, 
