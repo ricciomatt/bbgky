@@ -339,7 +339,7 @@ def plot_ptrans(
         x0 = time, 
         x1 = time,
         y0 =plt.layout[f'yaxis{tit}']['domain'][0], y1 = plt.layout[f'yaxis{tit}']['domain'][1], line = dict(color = 'rgb(255,0,0)', width = 5, dash = 'dot'), 
-        name = '$\\huge \\text{Dynamical Phase Point}$', legend = 'legend4', showlegend = True
+        name = '$\\huge \\text{Dynamical Phase Point}$', legend = 'legend4', showlegend = bool(tit == '')
         )
         for tit in titles
     ]
@@ -359,10 +359,10 @@ def plot_ptrans(
         xaxis3= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
         xaxis4= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
         
-        legend = dict(title = dict(text = r"One-Body Magic"), font = dict(size = 25)),
-        legend2 = dict(title = dict(text = r"One-Body Entropy"), font = dict(size = 25)),
-        legend3 = dict(title = dict(text = r"Order Paramter"), font = dict(size = 25)),
-        legend4 = dict(title = dict(text = r"Energy Scales"), font = dict(size = 25)),
+        legend = dict(title = dict(text = r"One-Body Magic"), font = dict(size = 35), xanchor = 'right'),
+        legend2 = dict(title = dict(text = r"One-Body Entropy"), font = dict(size = 35), xanchor = 'right'),
+        legend3 = dict(title = dict(text = r"Order Paramter"), font = dict(size = 35), xanchor = 'right'),
+        legend4 = dict(title = dict(text = r"Energy Scales"), font = dict(size = 35), xanchor = 'right'),
 
         shapes = shapes,
         annotations = annotations
