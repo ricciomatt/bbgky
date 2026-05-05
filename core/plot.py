@@ -244,7 +244,7 @@ def plot_non_local(
             yref='paper',
             font = dict(size= 30),
             x = plt.layout[f'xaxis{key}']['domain'][0],
-            y = plt.layout[f'yaxis{key}']['domain'][1],
+            y = plt.layout[f'yaxis{key}']['domain'][1]+.015,
             xanchor = 'left',
             yanchor = 'top',
         )
@@ -257,7 +257,7 @@ def plot_non_local(
             yref='paper',
             font = dict(size= 30),
             x = .475,
-            y = plt.layout[f'yaxis2']['domain'][1]+.005,
+            y = plt.layout[f'yaxis2']['domain'][1]+.0025,
             xanchor = 'left',
             yanchor = 'top',
         ),
@@ -267,7 +267,7 @@ def plot_non_local(
             yref='paper',
             font = dict(size= 30),
             x = 1.05,
-            y = plt.layout[f'yaxis6']['domain'][1]+.005,
+            y = plt.layout[f'yaxis6']['domain'][1]+.0025,
             xanchor = 'left',
             yanchor = 'top',
         )
