@@ -14,7 +14,7 @@ from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core.core impor
 
 def plot_non_local(
         PhiBar:torch.Tensor, GammaBar:torch.Tensor, t:torch.Tensor, pMag:torch.Tensor, 
-        plot_path:str, sun:SUConnection, lfs:dict[str:pl.LazyFrame], plt:PlotIt
+        plot_path:str, sun:SUConnection, lfs:dict[str:pl.LazyFrame], plt:PlotIt, to_image:bool = True,
     )->None:
     NSamp = 200
     N = 100
@@ -63,7 +63,6 @@ def plot_non_local(
     print('Computed')
 
 
-    plt = PlotIt()
     NSamp2 = 300
     plt.reset()
     plt.subplot_grid(ncols=1, nrows=4, spacingr=.05, leg_opts=dict(bordercolor="black", borderwidth=1))
@@ -238,13 +237,17 @@ def plot_non_local(
     )
     plt.update_layout(annotations = annotations )
     print('Non-Local Made')
-    plt.to_image(os.path.join(plot_path, 'NonLocal.png'))
 
+    if(to_image):
+        plt.to_image(os.path.join(plot_path, 'NonLocal.png'))
+        return 
+    else:
+        return plt
 
 def plot_ptrans(
         PhiBar:torch.Tensor, tfact:float, t:torch.Tensor, 
         plot_path:str, sun:SUConnection, B:LazyTensor,
-        plt:PlotIt, u:LazyTensor, N:int
+        plt:PlotIt, u:LazyTensor, N:int, to_image:bool = True
     )->None:
     
     plt.reset()
@@ -334,8 +337,11 @@ def plot_ptrans(
         
     )
 
-    plt.to_image(os.path.join(plot_path, 'PhaseTransition.png'))
-    
+    if(to_image):
+        plt.to_image(os.path.join(plot_path, 'PhaseTransition.png'))
+        return 
+    else:
+        return plt
 
 
 def plot_flav(PhiBar:torch.Tensor, sun:SUConnection, plt:PlotIt, t:torch.Tensor , path_base:str, N:int, to_image:bool = True)->None:
@@ -358,6 +364,11 @@ def plot_flav(PhiBar:torch.Tensor, sun:SUConnection, plt:PlotIt, t:torch.Tensor 
             marker=dict(color = color_Bar[m]), line = dict(width = 10, dash = dash[m]), 
             showlegend = True, name = f'$\\huge \\bar{{\\Phi}}_{k}$'
         )
+    plt.update_layout(
+        xaxis = dict(title = dict(text = r'$\huge {t(\omega_{0}^{-1})}$')),
+        yaxis = dict(title = dict(text = r"$\huge \text{Flavor Polarization}$")),
+        title = dict(text = r"$\Huge \textbf{Flavor Polarization Evolution}$")
+    )
     if(to_image):
         plt.to_image(os.path.join(path_base, 'Pz.png'))
         return 
