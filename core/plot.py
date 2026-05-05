@@ -266,7 +266,7 @@ def plot_non_local(
             xref='paper',
             yref='paper',
             font = dict(size= 30),
-            x = 1.05,
+            x = 1.,
             y = plt.layout[f'yaxis6']['domain'][1]+.0025,
             xanchor = 'left',
             yanchor = 'top',
