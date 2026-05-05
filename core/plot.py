@@ -356,5 +356,5 @@ def plot_flav(PhiBar:torch.Tensor, sun:SUConnection, plt:PlotIt, t:torch.Tensor 
             marker=dict(color = color_Bar[m]), line = dict(width = 10, dash = dash[m]), 
             showlegend = True, name = f'$\\huge \\bar{{\\Phi}}_{k}$'
         )
-    plt.to_image(os.path.join(path_base, 'Pz'))
+    plt.to_image(os.path.join(path_base, 'Pz.png'))
     return 
