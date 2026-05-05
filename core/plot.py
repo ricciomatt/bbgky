@@ -331,11 +331,12 @@ def plot_ptrans(
         )
         for key, val in titles.items()
     ]
+    ix = (PhiBar.mean(1).pow(2).sum(-1).real < 1-1e-3)
     shapes = [
         dict(
         type= 'line', xref= 'x4', yref= 'paper', 
-        x0 = (t[:-1][(PhiBar.mean(1).pow(2).sum(-1).real < 1-1e-3)][0]), 
-        x1 = (t[:-1][(PhiBar.mean(1).pow(2).sum(-1).real < 1-1e-3)][0]),
+        x0 = (t[:-1][ix][0]), 
+        x1 = (t[:-1][ix][0]),
         y0 =plt.layout[f'yaxis{t}']['domain'][0], y1 = plt.layout[f'yaxis{t}']['domain'][1], line = dict(color = 'rgb(255,0,0)', width = 5, dash = 'dot'), 
         name = '$\\huge \\text{Dynamical Phase Point}$', legend = 'legend4', showlegend = True
         )
