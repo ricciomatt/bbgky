@@ -8,6 +8,10 @@ from qunum.numerical.mathematics.algebra import wigner_kernel
 from qunum.numerical.physics.constants import h_barEvS as hbar
 import torch, pickle, numpy as np, polars as pl, os, sys
 from polars import col, int_ranges
+from math import sqrt as msqrt
+from qunum.numerical.physics.quantum.operators.dense.nuetrino import pmns2, pmns3
+from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core.core import pmnsrotPhi
+
 def plot_non_local(
         PhiBar:torch.Tensor, GammaBar:torch.Tensor, t:torch.Tensor, pMag:torch.Tensor, 
         plot_path:str, sun:SUConnection, lfs:dict[str:pl.LazyFrame], plt:PlotIt
@@ -333,16 +337,14 @@ def plot_ptrans(
     plt.to_image(os.path.join(plot_path, 'PhaseTransition.png'))
     
 
-from math import sqrt as msqrt
-from qunum.numerical.physics.quantum.operators.dense.nuetrino import pmns2, pmns3
-from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core.core import pmnsrotPhi
-def plot_flav(PhiBar:torch.Tensor, sun:SUConnection, plt:PlotIt, t:torch.Tensor , path_base:str, N:int)->None:
+
+def plot_flav(PhiBar:torch.Tensor, sun:SUConnection, plt:PlotIt, t:torch.Tensor , path_base:str, N:int, to_image:bool = True)->None:
     Pz = pmnsrotPhi(PhiBar, sun)[...,]
     plt.reset()
     color = ['rgba(255,0,0,.5)', 'rgba(0,0,255,.5)']
     color_Bar = ['rgb(0,0,0)', 'rgb(100,50,150)']
     dash = ['dot','dash']
-    for m, k in enumerate((torch.arange(2,sun.n+1).pow(2)-2)):
+    for m, k in enumerate((torch.arange(2,sun.n+1).pow(2)-1)):
         plt.extend_data(*(
             dict(
                 x = t, y = Pz[...,i,k].real, 
@@ -356,5 +358,8 @@ def plot_flav(PhiBar:torch.Tensor, sun:SUConnection, plt:PlotIt, t:torch.Tensor 
             marker=dict(color = color_Bar[m]), line = dict(width = 10, dash = dash[m]), 
             showlegend = True, name = f'$\\huge \\bar{{\\Phi}}_{k}$'
         )
-    plt.to_image(os.path.join(path_base, 'Pz.png'))
-    return 
+    if(to_image):
+        plt.to_image(os.path.join(path_base, 'Pz.png'))
+        return 
+    else:
+        return plt
