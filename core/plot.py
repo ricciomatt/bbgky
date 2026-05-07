@@ -11,6 +11,7 @@ from polars import col, int_ranges
 from math import sqrt as msqrt
 from qunum.numerical.physics.quantum.operators.dense.nuetrino import pmns2, pmns3
 from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core.core import pmnsrotPhi
+from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core.qi import oneBodyMagic
 
 
 def plot_non_local(
@@ -329,11 +330,7 @@ def plot_ptrans(
 
         showlegend = True, name = '$\\huge \\bar{S}_{2}$', legendgroup = 'S'
     )
-    J = torch.einsum('aij, qpij->qpa',sun.get_repr(), wigner_kernel(sun.n).conj() )/sun.n
-    T = sun.get_repr()
-    W = torch.einsum('...a, a, qpa->...qp', PhiBar.to(torch.complex128), sun.get_beta(T)[1:], J[...,1:]) + J[...,0]/sun.n 
-
-    M2 = -(W.abs().pow(4).sum(dim=(-1,-2)).log()).real/3
+    M2 = oneBodyMagic(PhiBar,)
     plt.extend_data(*(
             dict(
                 x = t, y =  M2[:,i],
@@ -351,10 +348,10 @@ def plot_ptrans(
         showlegend = True, name = '$\\huge \\bar{\\mathcal{M}}_{4}$', legendgroup = 'M'
     )
     titles = {
-        '4':r'$\huge\textbf{Energy Scales}$', 
-        '3':r'$\huge\textbf{Order Parameter}$', 
-        '2':r'$\huge\textbf{Entropy Evolution}$',
-        '':r'$\huge\textbf{Magic Evolution}$',
+        '4':r'$\huge\textbf{Energy  Scales}$', 
+        '3':r'$\huge\textbf{Order  Parameter}$', 
+        '2':r'$\huge\textbf{Entropy  Evolution}$',
+        '':r'$\huge\textbf{Magic  Evolution}$',
     } 
     annotations = [
         dict(
