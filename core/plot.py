@@ -10,9 +10,8 @@ import torch, pickle, numpy as np, polars as pl, os, sys
 from polars import col, int_ranges
 from math import sqrt as msqrt
 from qunum.numerical.physics.quantum.operators.dense.nuetrino import pmns2, pmns3
-from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core.core import pmnsrotPhi
-from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core.qi import oneBodyMagic
-
+from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core.core import pmnsrotPhi, pmnsRotGamma
+from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core.qi import oneBodyMagic, oneBodyMana, twoBodyMagic, twoBodyMana
 
 def plot_non_local(
     PhiBar:torch.Tensor, GammaBar:torch.Tensor, t:torch.Tensor, pMag:torch.Tensor, 
@@ -283,14 +282,14 @@ def plot_non_local(
     else:
         return plt
 
-def plot_ptrans(
+def plot_ptrans_dep(
         PhiBar:torch.Tensor, tfact:float, t:torch.Tensor, 
         plot_path:str, sun:SUConnection, B:LazyTensor,
         plt:PlotIt, u:LazyTensor, N:int, to_image:bool = True
     )->None|PlotIt:
     
     plt.reset()
-    plt.subplot_grid(ncols=1, nrows=4, spacingr=.05, leg_opts=dict(bordercolor="black", borderwidth=3))
+    plt.subplot_grid(ncols=1, nrows=4, spacingr=.05)
     
     plt.add_data(
         x = t, y = PhiBar.real.mean(1).pow(2).sum(-1).real, 
@@ -374,7 +373,7 @@ def plot_ptrans(
         x0 = time, 
         x1 = time,
         y0 =plt.layout[f'yaxis{tit}']['domain'][0], y1 = plt.layout[f'yaxis{tit}']['domain'][1], line = dict(color = 'rgb(255,0,0)', width = 5, dash = 'dot'), 
-        name = r'$\huge \text{Dual Point}$', legend = 'legend4', showlegend = bool(tit == '')
+        name = r'$\huge \text{Dual  Point}$', legend = 'legend4', showlegend = bool(tit == '')
         )
         for tit in titles
     ]
@@ -394,10 +393,10 @@ def plot_ptrans(
         xaxis3= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
         xaxis4= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
         
-        legend = dict(title = dict(text = r"One-Body Magic"), font = dict(size = 28), xanchor = 'left', itemwidth=85),
-        legend2 = dict(title = dict(text = r"One-Body Entropy"), font = dict(size = 28), xanchor = 'left', itemwidth=85),
-        legend3 = dict(title = dict(text = r"Order Paramter"), font = dict(size = 28), xanchor = 'left', itemwidth=85),
-        legend4 = dict(title = dict(text = r'Energy Scales'), font = dict(size = 28), xanchor = 'left', itemwidth=85),
+        legend  = dict(title = dict(text = r"One-Body Magic"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+        legend2 = dict(title = dict(text = r"One-Body Entropy"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+        legend3 = dict(title = dict(text = r"Order Paramter"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+        legend4 = dict(title = dict(text = r'Energy Scales'), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
 
         shapes = shapes,
         annotations = annotations
@@ -412,35 +411,324 @@ def plot_ptrans(
         return plt
 
 def plot_flav(
-        PhiBar:torch.Tensor, sun:SUConnection, plt:PlotIt, t:torch.Tensor , path_base:str, N:int, to_image:bool = True
+        PhiBar:torch.Tensor, GammaBar:torch.Tensor, sun:SUConnection, plt:PlotIt, t:torch.Tensor , path_base:str, N:int, to_image:bool = True, 
+        Nsamp:int = 200
     )->None|PlotIt:
     Pz = pmnsrotPhi(PhiBar, sun)[...,]
+    GT = pmnsRotGamma(GammaBar, N, sun)
     plt.reset()
+    plt.subplot_grid(nrows = 2, ncols =1,spacingr=.05)
     color = ['rgba(255,0,0,.5)', 'rgba(0,0,255,.5)']
     color_Bar = ['rgb(0,0,0)', 'rgb(100,50,150)']
     dash = ['dot','dash']
+    A = computeBaseMaps(N, sun.n, ret_dict=True)['Gmp']
+   
     for m, k in enumerate((torch.arange(2,sun.n+1).pow(2)-1)):
         plt.extend_data(*(
             dict(
                 x = t, y = Pz[...,i,k].real, 
                 marker=dict(color = color[m]), line = dict(width = 5), 
                 showlegend = bool(i<1), 
-                name = r'$\huge n_{A\nu_{e}}-n_{A\nu_{x}}$'
+                name = r'$\huge\Phi^{\text{Flavor}}_{A'+str(int(k))+'}$',legend = 'legend',
             ) for i in range(N)
         ))
         plt.add_data(
             x = t, y = Pz[...,k].real.mean(-1), 
             marker=dict(color = color_Bar[m]), line = dict(width = 10, dash = dash[m]), 
-            showlegend = True, name = r'$\huge\langle n_{\nu_{e}}-n_{\nu_{x}}\rangle$'
+            showlegend = True, name = r'$\huge\bar{\Phi}^{\text{Flavor}}_{'+str(int(k))+'}$',legend = 'legend',
         )
+
+        IX = A.filter(pl.col('a').__eq__(k-1) & pl.col('b').__eq__(k-1)).collect().sample(Nsamp)['AaBb']
+        
+        plt.extend_data(*(
+            dict(
+                x = t, y = GT[...,i].real, 
+                marker=dict(color = color[m]), line = dict(width = 5), 
+                showlegend = bool(j<1), xaxis = 'x2', yaxis = 'y2',
+                name =r'$\huge\Gamma^{\text{Flavor}}_{A'+str(int(k))+'B'+str(int(k))+'}$' ,legend = 'legend2',
+            ) for j,i in enumerate(IX)
+        ))
+        plt.add_data(
+            x = t, y = GT[:, A.filter(pl.col('a').__eq__(k-1) & pl.col('b').__eq__(k-1)).collect()['AaBb']].real.mean(-1), 
+            marker=dict(color = color_Bar[m]), line = dict(width = 10, dash = dash[m]), xaxis = 'x2', yaxis = 'y2',legend = 'legend2',
+            showlegend = True, name = r'$\huge\bar{\Gamma}^{\text{Flavor}}_{'+str(int(k))+''+str(int(k))+'}$'
+        )
+    
     plt.update_layout(
         xaxis = dict(title = dict(text = r'$\huge {t(\omega_{0}^{-1})}$')),
-        yaxis = dict(title = dict(text = r"$\huge \text{Flavor Polarization}$")),
-        title = dict(text = r"$\Huge \textbf{Flavor Polarization Evolution}$")
+        xaxis2 = dict(title = dict(text = r'$\huge {t(\omega_{0}^{-1})}$')),
+        yaxis = dict(title = dict(text = r"$\huge \Phi_{A\mathfrak{d}}^{\text{Flavor}}$")),
+        yaxis2 = dict(title = dict(text = r"$\huge \Gamma_{A\mathfrak{d}B\mathfrak{d}}^{\text{Flavor}}$")),
+        title = dict(text = r"$\Huge \textbf{Flavor Polarization Evolution}$"),
+        height = 1500,
     )
+    print('Rendering...')
     if(to_image):
         plt.to_image(os.path.join(path_base, 'Pz.png'))
         return 
     else:
         return plt
+
+
+def plot_ptrans(
+        PhiBar:torch.Tensor, tfact:float, t:torch.Tensor, 
+        plot_path:str, sun:SUConnection, B:LazyTensor,
+        plt:PlotIt, u:LazyTensor, N:int, to_image:bool = True
+    )->None|PlotIt:
+    
+    plt.reset()
+    plt.subplot_grid(ncols=1, nrows=3, spacingr=.05)
+
+    S = oneBodyRenyiEntropy(PhiBar, sun = sun, )
+
+    plt.extend_data(*(
+            dict(
+                x = t, y =  S[:,i],
+                xaxis = 'x', yaxis = 'y', legend = 'legend',
+                line = dict(width = 10, dash = 'solid'), marker = dict(color = 'rgba(255,0,0,.25)',),
+                showlegend = bool(i == 0), name = '$\\huge S_{2,A}$',legendgroup = 'S', 
+            ) for i in range(N )
+        )
+    )
+    St = S.std(-1)
+    S = S[:,].mean(-1)
+    plt.add_data(
+        x = t, y=  S,
+        xaxis = 'x', yaxis = 'y', legend = 'legend',
+        line = dict(width = 7.5, dash='solid'), marker=dict(color='black'), 
+
+        showlegend = True, name = '$\\huge \\bar{S}_{2}$', legendgroup = 'S'
+    )
+    plt.add_data(
+        x = t, y=  S+St,
+        xaxis = 'x', yaxis = 'y', legend = 'legend',
+        line = dict(width = 7.5, dash='dash'), marker=dict(color='black'),
+        showlegend = True, name = r'$\huge \bar{S}_{2} \pm \sigma_{(S_{2})}$', legendgroup = 'S'
+    )
+    plt.add_data(
+        x = t, y=  S-St,
+        xaxis = 'x', yaxis = 'y', legend = 'legend',
+        line = dict(width = 7.5, dash='dash'), marker=dict(color='black'),
+        showlegend = False, legendgroup = 'S'
+    )
+    plt.add_data(
+        x = t, y = PhiBar.real.mean(1).pow(2).sum(-1).real, 
+        marker = dict(color = 'blue'), line = dict(width = 4, dash = 'solid'),
+        yaxis = 'y2', xaxis = 'x2',  legend = 'legend2',
+        name = '$\\huge \\bar{\\Phi}_a\\bar{\\Phi}^a$', legendgroup = 'A', showlegend = True, 
+    )
+    
+    plt.add_data(
+        x = [0, t[-1]], y = [B(0)[:,2].real.mean().item(), B(0)[:,2].real.mean().item()],
+        line=dict(width = 4, dash='dash'), marker=dict(color = 'orange'),   mode='lines',
+        yaxis = 'y3', xaxis ='x3', legend = 'legend3', 
+        name = '$\\huge|\\bar{B}|$', showlegend = True
+    )
+    plt.add_data(
+        x = t, y = u(tfact*t).real, 
+        yaxis= 'y3', xaxis = 'x3', legend = 'legend3',
+        line=dict(width = 4), marker = dict(color = 'purple'), 
+        name = '$\\huge \\mu_{(t)}$', showlegend = True
+    )
+   
+    
+    titles = {
+        '3':r'$\huge\textbf{Energy  Scales}$', 
+        '2':r'$\huge\textbf{Order  Parameter}$', 
+        '':r'$\huge\textbf{Entropy  Evolution}$',
+    } 
+    annotations = [
+        dict(
+            text=val,
+            xref='paper',
+            yref='paper',
+            font = dict(size= 30),
+            x = plt.layout[f'xaxis{key}']['domain'][0],
+            y = plt.layout[f'yaxis{key}']['domain'][1]+.015,
+            xanchor = 'left',
+            yanchor = 'top',
+        )
+        for key, val in titles.items()
+    ]
+    ix = (PhiBar.mean(1).pow(2).sum(-1).real < 1-1e-3)
+    time = (t[:-1][ix][0])
+    
+    shapes = [
+        dict(
+        type= 'line', xref= f'x{tit}', yref= 'paper', 
+        x0 = time, 
+        x1 = time,
+        y0 =plt.layout[f'yaxis{tit}']['domain'][0], y1 = plt.layout[f'yaxis{tit}']['domain'][1], line = dict(color = 'rgb(255,0,0)', width = 5, dash = 'dot'), 
+        name = r'$\huge \text{Dual  Point}$', legend = 'legend3', showlegend = bool(tit == '')
+        )
+        for tit in titles
+    ]
+    plt.update_layout(
+        height = 2500, width = 2000, 
+        title = dict(
+            text = r'$\Huge \textbf{Dynamical  Phase  Transition  around  the  effective  Daul  Point}(\mu_{(t)} \sim |\bar{B}|)$',
+            yref= 'paper', x=0, xref = 'paper'
+        ),
+        yaxis = dict(title = dict(text = r"$\huge {S}_{2,A}$")),
+        yaxis2= dict(title = dict(text = r"$\huge\bar{\Phi}^a \bar{\Phi}_{a}$")),
+        yaxis3= dict(title = dict(text = r"$\huge E$")),
         
+        
+        xaxis = dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
+        xaxis2= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
+        xaxis3= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
+        
+        legend  = dict(title = dict(text = r"One-Body Magic"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+        legend2 = dict(title = dict(text = r"One-Body Entropy"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+        legend3 = dict(title = dict(text = r"Order Paramter"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+        
+        shapes = shapes,
+        annotations = annotations
+    
+        
+    )
+
+    if(to_image):
+        plt.to_image(os.path.join(plot_path, 'PhaseTransition.png'))
+        return 
+    else:
+        return plt
+
+
+def plot_magic_mana(
+        PhiBar:torch.Tensor, GammaBar:torch.Tensor, t:torch.Tensor, 
+        plot_path:str, sun:SUConnection,
+        plt:PlotIt, N:int, to_image:bool = True
+    )->None|PlotIt:
+    
+    plt.reset()
+    plt.subplot_grid(ncols=1, nrows=4, spacingr=.05)
+    # one Body
+    M2 = oneBodyMagic(PhiBar,)
+    plt.extend_data(*(
+            dict(
+                x = t, y =  M2[:,i],
+                xaxis = 'x3', yaxis = 'y3', legend = 'legend3',
+                line = dict(width = 10, dash = 'solid'), marker = dict(color = 'rgba(255,0,0,.25)',),
+                showlegend = bool(i == 0), name = '$\\huge \\mathscr{M}_{2,A}$', 
+                
+            ) for i in range(N)
+        )
+    )
+    plt.add_data(
+        x = t, y=  M2[:,].mean(-1),
+        xaxis = 'x3', yaxis = 'y3', legend = 'legend3',
+        line = dict(width = 7.5, dash='solid'), marker=dict(color='black'),
+        showlegend = True, name = '$\\huge \\bar{\\mathscr{M}}_{2}$', 
+    )
+
+    M2 = oneBodyMana(PhiBar,)
+    
+    plt.extend_data(*(
+            dict(
+                x = t, y =  M2[:,i],
+                xaxis = 'x', yaxis = 'y', legend = 'legend',
+                line = dict(width = 10, dash = 'solid'), marker = dict(color = 'rgba(255,0,0,.25)',),
+                showlegend = bool(i == 0), name = '$\\huge \\mathcal{M}_{A}$', 
+                
+            ) for i in range(N )
+        )
+    )
+    plt.add_data(
+        x = t, y=  M2[:,].mean(-1),
+        xaxis = 'x', yaxis = 'y', legend = 'legend',
+        line = dict(width = 7.5, dash='solid'), marker=dict(color='black'),
+        showlegend = True, name = '$\\huge \\bar{\\mathcal{M}}$'
+    )
+
+    #two Body
+    M2 = twoBodyMagic(PhiBar, GammaBar, sun, ret_map=False)
+    IX = torch.randint(0, N*(N-1)//2 * (sun.n**2-1)**2, 200)
+    plt.extend_data(*(
+            dict(
+                x = t, y =  M2[:,i],
+                xaxis = 'x3', yaxis = 'y3', legend = 'legend3',
+                line = dict(width = 10, dash = 'solid'), marker = dict(color = 'rgba(255,0,0,.25)',),
+                showlegend = bool(j == 0), name = '$\\huge \\mathscr{M}_{2,A}$', 
+                
+            ) for j,i in enumerate(IX)
+        )
+    )
+    plt.add_data(
+        x = t, y=  M2[:,].mean(-1),
+        xaxis = 'x3', yaxis = 'y3', legend = 'legend3',
+        line = dict(width = 7.5, dash='solid'), marker=dict(color='black'),
+        showlegend = True, name = '$\\huge \\bar{\\mathscr{M}}_{2}$', 
+    )
+
+    M2 = twoBodyMana(PhiBar, GammaBar, sun, ret_map=False)
+    
+    
+    plt.extend_data(*(
+            dict(
+                x = t, y =  M2[:,i],
+                xaxis = 'x', yaxis = 'y', legend = 'legend',
+                line = dict(width = 10, dash = 'solid'), marker = dict(color = 'rgba(255,0,0,.25)',),
+                showlegend = bool(j == 0), name = '$\\huge \\mathcal{M}_{A}$', 
+                
+            ) for j,i in enumerate(IX)
+        )
+    )
+    plt.add_data(
+        x = t, y=  M2[:,].mean(-1),
+        xaxis = 'x', yaxis = 'y', legend = 'legend',
+        line = dict(width = 7.5, dash='solid'), marker=dict(color='black'),
+        showlegend = True, name = '$\\huge \\bar{\\mathcal{M}}$'
+    )
+
+    titles = {
+        '4':r'$\huge\textbf{Two-Body Magic}$', 
+        '3':r'$\huge\textbf{One-Body Magic}$', 
+        '2':r'$\huge\textbf{Two-Body Mana}$',
+        '':r'$\huge\textbf{One-Body Mana}$',
+    } 
+    annotations = [
+        dict(
+            text=val,
+            xref='paper',
+            yref='paper',
+            font = dict(size= 30),
+            x = plt.layout[f'xaxis{key}']['domain'][0],
+            y = plt.layout[f'yaxis{key}']['domain'][1]+.015,
+            xanchor = 'left',
+            yanchor = 'top',
+        )
+        for key, val in titles.items()
+    ]
+    
+    plt.update_layout(
+        height = 2500, width = 2000, 
+        title = dict(
+            text = r'$\Huge \textbf{Dynamical  Phase  Transition  around  the  effective  Daul  Point}(\mu_{(t)} \sim |\bar{B}|)$',
+            yref= 'paper', x=0, xref = 'paper'
+        ),
+        yaxis3 = dict(title = dict(text = r"$\huge \mathcal{M}_{A}$")),
+        yaxis4= dict(title = dict(text = r"$\huge  \mathcal{M}_{AB}$")),
+        yaxis= dict(title = dict(text = r"$\huge   \mathscr{M}_{2A}$")),
+        yaxis2= dict(title = dict(text = r"$\huge  \mathscr{M}_{2AB}$")),
+
+        xaxis = dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
+        xaxis2= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
+        xaxis3= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
+        xaxis4= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
+        
+        legend  = dict(title = dict(text = r"One-Body Mana"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+        legend2 = dict(title = dict(text = r"Two-Body Mana"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+        legend3 = dict(title = dict(text = r"One-Body Magic"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+        legend4 = dict(title = dict(text = r'Two-Body Magic'), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+
+        annotations = annotations
+    
+        
+    )
+
+    if(to_image):
+        plt.to_image(os.path.join(plot_path, 'PhaseTransition.png'))
+        return 
+    else:
+        return plt
