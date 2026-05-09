@@ -459,7 +459,10 @@ def plot_flav(
         xaxis2 = dict(title = dict(text = r'$\huge {t(\omega_{0}^{-1})}$')),
         yaxis = dict(title = dict(text = r"$\huge \Phi_{A\mathfrak{d}}^{\text{Flavor}}$")),
         yaxis2 = dict(title = dict(text = r"$\huge \Gamma_{A\mathfrak{d}B\mathfrak{d}}^{\text{Flavor}}$")),
-        title = dict(text = r"$\Huge \textbf{Flavor Polarization Evolution}$"),
+        legend  = dict(title = dict(text = r'One-Body Flavor<br>Population Evolution'), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+        legend2 = dict(title = dict(text = r"Two-Body Flavor<br>Population Evolution"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+        
+        title = dict(text = r"$\Huge \textbf{Flavor Population Evolution}$"),
         height = 1500,
     )
     print('Rendering...')
@@ -468,7 +471,6 @@ def plot_flav(
         return 
     else:
         return plt
-
 
 def plot_ptrans(
         PhiBar:torch.Tensor, tfact:float, t:torch.Tensor, 
@@ -598,13 +600,13 @@ def plot_ptrans(
 def plot_magic_mana(
         PhiBar:torch.Tensor, GammaBar:torch.Tensor, t:torch.Tensor, 
         plot_path:str, sun:SUConnection,
-        plt:PlotIt, N:int, to_image:bool = True
+        plt:PlotIt, N:int, to_image:bool = True, Nsamp:int = 200
     )->None|PlotIt:
     
     plt.reset()
     plt.subplot_grid(ncols=1, nrows=4, spacingr=.05)
     # one Body
-    M2 = oneBodyMagic(PhiBar,)
+    M2 = oneBodyMagic(PhiBar.clone(),)
     plt.extend_data(*(
             dict(
                 x = t, y =  M2[:,i],
@@ -619,10 +621,10 @@ def plot_magic_mana(
         x = t, y=  M2[:,].mean(-1),
         xaxis = 'x3', yaxis = 'y3', legend = 'legend3',
         line = dict(width = 7.5, dash='solid'), marker=dict(color='black'),
-        showlegend = True, name = '$\\huge \\bar{\\mathscr{M}}_{2}$', 
+        showlegend = True, name = '$\\huge \\bar{\\mathscr{M}}_{2,A}$', 
     )
 
-    M2 = oneBodyMana(PhiBar,)
+    M2 = oneBodyMana(PhiBar.clone(),).log()
     
     plt.extend_data(*(
             dict(
@@ -638,49 +640,46 @@ def plot_magic_mana(
         x = t, y=  M2[:,].mean(-1),
         xaxis = 'x', yaxis = 'y', legend = 'legend',
         line = dict(width = 7.5, dash='solid'), marker=dict(color='black'),
-        showlegend = True, name = '$\\huge \\bar{\\mathcal{M}}$'
+        showlegend = True, name = '$\\huge \\bar{\\mathcal{M}}_{A}$'
     )
 
-    #two Body
-    M2 = twoBodyMagic(PhiBar, GammaBar, sun, ret_map=False)
-    IX = torch.randint(0, N*(N-1)//2 * (sun.n**2-1)**2, 200)
+   #two Body
+    M2 = twoBodyMagic(PhiBar.clone(), GammaBar.clone(), sun, ret_map=False)
+    IX = torch.randint(0, N*(N-1)//2, (Nsamp,))
     plt.extend_data(*(
             dict(
-                x = t, y =  M2[:,i],
-                xaxis = 'x3', yaxis = 'y3', legend = 'legend3',
+                x = t, y =  M2[:,i].real,
+                xaxis = 'x4', yaxis = 'y4', legend = 'legend4',
                 line = dict(width = 10, dash = 'solid'), marker = dict(color = 'rgba(255,0,0,.25)',),
-                showlegend = bool(j == 0), name = '$\\huge \\mathscr{M}_{2,A}$', 
+                showlegend = bool(j == 0), name = '$\\huge \\mathscr{M}_{2,AB}$', 
                 
             ) for j,i in enumerate(IX)
         )
     )
     plt.add_data(
-        x = t, y=  M2[:,].mean(-1),
-        xaxis = 'x3', yaxis = 'y3', legend = 'legend3',
+        x = t, y=  M2[:,].mean(-1).real,
+        xaxis = 'x4', yaxis = 'y4', legend = 'legend4',
         line = dict(width = 7.5, dash='solid'), marker=dict(color='black'),
-        showlegend = True, name = '$\\huge \\bar{\\mathscr{M}}_{2}$', 
+        showlegend = True, name = '$\\huge \\bar{\\mathscr{M}}_{2,AB}$', 
     )
-
-    M2 = twoBodyMana(PhiBar, GammaBar, sun, ret_map=False)
-    
+    M2, _ = twoBodyMana(PhiBar.clone(), GammaBar.clone(), sun, ret_map=True)
     
     plt.extend_data(*(
             dict(
-                x = t, y =  M2[:,i],
-                xaxis = 'x', yaxis = 'y', legend = 'legend',
+                x = t, y =  M2[:,i].real,
+                xaxis = 'x2', yaxis = 'y2', legend = 'legend2',
                 line = dict(width = 10, dash = 'solid'), marker = dict(color = 'rgba(255,0,0,.25)',),
-                showlegend = bool(j == 0), name = '$\\huge \\mathcal{M}_{A}$', 
+                showlegend = bool(j == 0), name = '$\\huge \\mathcal{M}_{AB}$', 
                 
             ) for j,i in enumerate(IX)
         )
     )
     plt.add_data(
-        x = t, y=  M2[:,].mean(-1),
-        xaxis = 'x', yaxis = 'y', legend = 'legend',
+        x = t, y=  M2[:,].mean(-1).real,
+        xaxis = 'x2', yaxis = 'y2', legend = 'legend2',
         line = dict(width = 7.5, dash='solid'), marker=dict(color='black'),
-        showlegend = True, name = '$\\huge \\bar{\\mathcal{M}}$'
+        showlegend = True, name = '$\\huge \\bar{\\mathcal{M}}_{AB}$'
     )
-
     titles = {
         '4':r'$\huge\textbf{Two-Body Magic}$', 
         '3':r'$\huge\textbf{One-Body Magic}$', 
@@ -704,13 +703,13 @@ def plot_magic_mana(
     plt.update_layout(
         height = 2500, width = 2000, 
         title = dict(
-            text = r'$\Huge \textbf{Dynamical  Phase  Transition  around  the  effective  Daul  Point}(\mu_{(t)} \sim |\bar{B}|)$',
+            text = r'$\Huge \textbf{Non-Stabalizer Resources Present in Simulation)$',
             yref= 'paper', x=0, xref = 'paper'
         ),
         yaxis3 = dict(title = dict(text = r"$\huge \mathcal{M}_{A}$")),
-        yaxis4= dict(title = dict(text = r"$\huge  \mathcal{M}_{AB}$")),
-        yaxis= dict(title = dict(text = r"$\huge   \mathscr{M}_{2A}$")),
-        yaxis2= dict(title = dict(text = r"$\huge  \mathscr{M}_{2AB}$")),
+        yaxis4= dict(title = dict(text = r"$\huge \mathcal{M}_{AB}$")),
+        yaxis= dict(title = dict(text = r"$\huge \mathscr{M}_{2A}$")),
+        yaxis2= dict(title = dict(text = r"$\huge \mathscr{M}_{2AB}$")),
 
         xaxis = dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
         xaxis2= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
@@ -726,9 +725,9 @@ def plot_magic_mana(
     
         
     )
-
+    print('Rendering')
     if(to_image):
-        plt.to_image(os.path.join(plot_path, 'PhaseTransition.png'))
+        plt.to_image(os.path.join(plot_path, 'MagicMana.png'))
         return 
     else:
         return plt

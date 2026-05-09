@@ -134,19 +134,43 @@ def run_job(n:int = 2, N:int = 100, Nsteps:int = 5000, sl_time:float = 60, Nproc
     return 
 
 def unpack_script_args(inp_args:list[str], **kwargs:dict[str:Any])->dict[str:Any]:
+    
+    def pat_match(val, key):
+        pats = {int:r"^[+-]?(0|[1-9]\d*)$", float:r"^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$"}
+        if(val =='None'):
+            return None
+        print(key, type(val), val)
+        for tp, pat in pats.items():
+            if re.match(pat, val):
+                try:
+                    val = tp(val)
+                except:
+                    pass
+                break 
+        print(key,type(val), val)
+        return val
     for key, val in map(lambda x: x.split('='), inp_args[1:]):
         if(key in kwargs):
-            kwargs[key] = type(kwargs[key])(val)
+            match kwargs[key]:
+                case None:
+                    if(str(val) == 'None'):
+                        kwargs[key] = None
+                    else:    
+                        kwargs[key] = pat_match(val,key)
+                case Tensor():
+
+                    if(val == 'None'):
+                        kwargs[key] = None
+                    else:
+                        kwargs[key] = torch.tensor(float(val))
+                case _:
+                    if(val == 'None'):
+                        kwargs[key] = None
+                    else:
+                        kwargs[key] = type(kwargs[key])(val)
+            
         else:
-            pats = {int:r"^[+-]?(0|[1-9]\d*)$", float:r"^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$"}
-            mt = True
-            for tp, pat in pats.items():
-                if re.match(pat, val):
-                    kwargs[key] = tp(val)
-                    mt = False
-                    break 
-            if(mt):
-                kwargs[key] = val
+            kwargs[key] = pat_match(val, key)
     return kwargs
 
 
@@ -215,7 +239,7 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
         os.makedirs(path)
     # Prepare task arguments
     max_cores =  min(max_cores if max_cores is not None else os.cpu_count(), os.cpu_count())
-    tasks = {i:(n, N, Nsteps, i%Nproc, max_cores, path, tmp_path, kwargs) for i in range(tot_proc)}
+    tasks = {i:(n, N, Nsteps, i%Nproc, max_cores, path, tmp_path, i, kwargs) for i in range(tot_proc)}
     data_path = os.path.join(tmp_path, 'Data')
     if not os.path.exists(data_path):
         os.makedirs(data_path, exist_ok=True)
@@ -278,11 +302,11 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
     os.removedirs(tmp_path)
     return
 
-def run_single_job_get_data(args:tuple[int, int, int, int,str, str, dict])->tuple[int,int, Tensor, Tensor]:
-    n, N, Nsteps, i, max_cores, path, tgt_path, kwargs = args
-    log_file = f"{path}/log_{i}_{int(time.time())}.log"
+def run_single_job_get_data(args:tuple[int, int, int, int,str, str, int, dict])->tuple[int,int, Tensor, Tensor]:
+    n, N, Nsteps, i, max_cores, path, tgt_path, I, kwargs = args
+    log_file = f"{path}/log_{I}_{int(time.time())}.log"
     # Construct the command
-    cmd = [sys.executable, 'multangle.py', f'n={n}', f'N={N}', f'Nsteps={Nsteps}', f'I={i}', *(f"{key}={val}" for key,val in dict(kwargs).items())]
+    cmd = [sys.executable, 'multangle.py', f'n={n}', f'N={N}', f'tgt_u0=None', f'Nsteps={Nsteps}', f'I={i}', *(f"{key}={val}" for key,val in dict(kwargs).items())]
     env = os.environ.copy()
     env["OMP_NUM_THREADS"] = f"{max_cores}" 
     env["MKL_NUM_THREADS"] = f"{max_cores}"

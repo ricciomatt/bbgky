@@ -16,7 +16,7 @@ if __name__ == '__main__':
     N = kwargs["N"]
     n = kwargs['n']
     r = int(kwargs['r0_Rv'])
-    if not os.path.exists(os.path.join(os.getcwd(), f"BBGKY{N}-{n}-{r}/indexmap")) and kwargs['memmap_mapsss']:
+    if not os.path.exists(os.path.join(os.getcwd(), f"BBGKY{N}-{n}-{r}/indexmap")) and kwargs['memmap_maps']:
         CMap(N=N, n= n, maps_loc=f"BBGKY{N}-{n}-{r}/indexmap")
     O = mk_obj(map_loc = f'BBGKY{N}-{n}-{r}/indexmap', **kwargs)
     t0 = time.time()
