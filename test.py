@@ -1,6 +1,6 @@
 import sys
 import time
-print(sys.argv)
-print('RanIt')
-time.sleep(1)
-print('Done')
+import torch
+with open('data/PhiBar.dat', 'rb') as file:
+    Phi:torch.Tensor = torch.load(file)
+print(Phi.pow(2).sum(-1), Phi.shape)
