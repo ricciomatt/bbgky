@@ -245,7 +245,7 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
         os.makedirs(data_path, exist_ok=True)
         PhiBar = np.memmap(os.path.join(data_path, 'PhiBar.dat'), dtype = np.float64, shape = (Nsteps, N, n**2-1) , mode = 'w+')
         D = N*(pow(n,2)-1)
-        GammaBar = np.memmap(os.path.join(data_path, 'GammaBar.dat'), shape = int(pow(D,2)*(1-1/N)/2), dtype = np.float64, mode='w+')
+        GammaBar = np.memmap(os.path.join(data_path, 'GammaBar.dat'), shape = int(Nsteps, pow(D,2)*(1-1/N)/2), dtype = np.float64, mode='w+')
         PhiBar[...] = 0
         GammaBar[...] = 0 
     else:
