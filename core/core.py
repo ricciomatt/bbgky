@@ -32,6 +32,7 @@ def mk_obj(tgt_path:str|None = None, N:int = 100, n:int = 100, I:int = 0, r0_Rv:
         timeit=True,
         **a
     )
+
 def load_obj(
         N:int = 100, 
         n:int = 100, 
@@ -213,8 +214,6 @@ def run_job_par(tgt_path:None|str=None, n:int=2, N:int=100, Nsteps:int=5000, Npr
                     print(f"Job {job_id} failed with code {return_code}")
     print('\nCompleted all iterations.')
 
-
-
 def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:int=100, Nsteps:int=5000, Nproc:int=5, tot_proc:int=100, I0:int = 0, max_cores:int|None = None, **kwargs:dict):
     if(tgt_path is None):
         tgt_path = os.getcwd()
@@ -250,18 +249,13 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
         PhiBar[...] = 0
         GammaBar[...] = 0 
     else:
-        try:
-            PhiBar = np.memmap(os.path.join(data_path, 'PhiBar.dat'), shape = (Nsteps, N, n**2-1), dtype = np.float64, mode = 'r+')
-        except:
-            PhiBar = np.memmap(os.path.join(data_path, 'PhiBar.dat'), shape = (Nsteps, N, n**2-1), dtype = np.float64, mode = 'w+')
+        PhiBar = np.memmap(os.path.join(data_path, 'PhiBar.dat'), shape = (Nsteps, N, n**2-1), dtype = np.float64, mode = 'w+')
         D = N*(pow(n,2)-1)
-        try:
-            GammaBar = np.memmap(os.path.join(data_path, 'GammaBar.dat'), shape = (Nsteps, int(pow(D,2)*(1-1/N)/2)), dtype = np.float64, mode='r+')
-        except:
-            GammaBar = np.memmap(os.path.join(data_path, 'GammaBar.dat'), shape =(Nsteps, int(pow(D,2)*(1-1/N)/2)), dtype = np.float64, mode='w+')
+        GammaBar = np.memmap(os.path.join(data_path, 'GammaBar.dat'), shape =(Nsteps, int(pow(D,2)*(1-1/N)/2)), dtype = np.float64, mode='w+')
     print(f"Starting {tot_proc} jobs using {Nproc} workers with {max_cores} cores per worker...")
 
     n_complete = 0
+    print(Nsteps, n, GammaBar.shape, PhiBar.shape)
     with tqdm.tqdm(total=tot_proc, desc=f"Computed 0/{Nproc}", unit="job", ncols=75,) as pbar:
         with ProcessPoolExecutor(max_workers=Nproc) as executor:
             while n_complete<tot_proc:
