@@ -289,14 +289,24 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
     if(os.path.exists(out_path)):
         os.makedirs(out_path, exist_ok= True)
         with open(os.path.join(out_path,'Nshots.pkl'), 'rb') as file:
-            T = pickle.load(file)
+            try:
+                T = pickle.load(file)
+            except:
+                T = 0
+        
         PhiBar = torch.from_numpy(PhiBar.copy())
         GammaBar = torch.from_numpy(GammaBar.copy())
         print('Processing')
         with open(os.path.join(out_path,'PhiBar.dat'), 'rb') as file:
-            PhiBar += torch.load(file)*T
+            try:
+                PhiBar += torch.load(file)*T
+            except:
+                pass
         with open(os.path.join(out_path,'GammaBar.dat'), 'rb') as file:
-            GammaBar += torch.load(file)*T
+            try:
+                GammaBar += torch.load(file)*T
+            except:
+                pass
         tot_proc+=T
         PhiBar/=tot_proc
         GammaBar/=tot_proc
