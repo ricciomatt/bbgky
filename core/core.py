@@ -136,7 +136,6 @@ def run_job(n:int = 2, N:int = 100, Nsteps:int = 5000, sl_time:float = 60, Nproc
     return 
 
 def unpack_script_args(inp_args:list[str], **kwargs:dict[str:Any])->dict[str:Any]:
-    
     def pat_match(val, key):
         pats = {int:r"^[+-]?(0|[1-9]\d*)$", float:r"^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$"}
         if(val =='None'):
@@ -157,17 +156,24 @@ def unpack_script_args(inp_args:list[str], **kwargs:dict[str:Any])->dict[str:Any
                 case None:
                     if(str(val) == 'None'):
                         kwargs[key] = None
+                    elif(str(val) == 'False'):
+                        kwargs[key] = False
+                    elif(str(val) == 'True'):
+                        kwargs[key] = True
                     else:    
                         kwargs[key] = pat_match(val,key)
                 case Tensor():
-
                     if(val == 'None'):
                         kwargs[key] = None
                     else:
                         kwargs[key] = torch.tensor(float(val))
                 case _:
-                    if(val == 'None'):
+                    if(str(val) == 'None'):
                         kwargs[key] = None
+                    elif(str(val) == 'False'):
+                        kwargs[key] = False
+                    elif(str(val) == 'True'):
+                        kwargs[key] = True
                     else:
                         kwargs[key] = type(kwargs[key])(val)
             
@@ -281,8 +287,7 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
                     GammaBar+=Gamma
                     PhiBar+=Phi
                     del Phi; del Gamma
-                    sys.path.remove(os.path.join(tmp_path,f'BBGKY{N}-{n}/Data/{i}_random_uniform/Gamma(t).npy'))
-                    sys.path.remove(os.path.join(tmp_path,f'BBGKY{N}-{n}/Data/{i}_random_uniform/Phi(t).npy'))
+                    shutil.rmtree(os.path.join(tmp_path,f'BBGKY{N}-{n}/Data/{i}_random_uniform'))
                     pbar.update(1)
                     gc.collect()
                 pbar.set_description(f"Computed {0}/{Nproc}")
@@ -290,7 +295,7 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
     out_path = os.path.join(tgt_path, 'data')
     if(os.path.exists(out_path)):
         os.makedirs(out_path, exist_ok= True)
-        with open(os.path.join(out_path,'Nshots.pkl'), 'rb') as file:
+        with open(os.path.join(out_path,f'Nshots{N}-{n}.pkl'), 'rb') as file:
             try:
                 T = pickle.load(file)
                 rd = True
@@ -302,17 +307,18 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
         GammaBar = torch.from_numpy(GammaBar.copy())
         print('Processing')
         if(rd):
-            with open(os.path.join(out_path,'PhiBar.dat'), 'rb') as file:
+            with open(os.path.join(out_path,f'PhiBar{N}-{n}.dat'), 'rb') as file:
                 try:
-                    tempP = torch.load(file)*T
+                    tempP:Tensor = torch.load(file)*T
                 except:
                     tempP = None
-            with open(os.path.join(out_path,'GammaBar.dat'), 'rb') as file:
+            with open(os.path.join(out_path,f'GammaBar{N}-{n}.dat'), 'rb') as file:
                 try:
-                    tempG = torch.load(file)*T
+                    tempG:Tensor = torch.load(file)*T
                 except:
                     tempG = None
             if(tempP is not None and tempG is not None):
+                print(tempP.shape, tempG.shape)
                 PhiBar += tempP*T
                 GammaBar += tempG * T
                 tot_proc+=T
@@ -325,12 +331,12 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
         PhiBar = torch.from_numpy(PhiBar.copy())/tot_proc
         GammaBar = torch.from_numpy(GammaBar.copy())/tot_proc
     print(PhiBar, GammaBar)
-    with open(os.path.join(out_path,'Nshots.pkl'), 'wb') as file:
+    with open(os.path.join(out_path,f'Nshots{N}-{n}.pkl'), 'wb') as file:
         pickle.dump(tot_proc, file)
-    with open(os.path.join(out_path, 'PhiBar.dat'), 'wb') as file: 
+    with open(os.path.join(out_path, f'PhiBar{N}-{n}.dat'), 'wb') as file: 
         torch.save(PhiBar,file) 
-    with open(os.path.join(out_path, 'GammaBar.dat'), 'wb') as file: 
-        torch.save(PhiBar,file)
+    with open(os.path.join(out_path, f'GammaBar{N}-{n}.dat'), 'wb') as file: 
+        torch.save(GammaBar,file)
     print(f'Data saved at {out_path}')
     print(f'Removing data at {tmp_path}')
     shutil.rmtree(tmp_path)

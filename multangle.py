@@ -6,10 +6,12 @@ from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation import BBGKYDec
 import pickle
 if __name__ == '__main__':
     kwargs = dict(tgt_path = None, N = 100, n = 2, Nsteps = 5_000, adaptive_epsilon = 1e-3, dt = 5e-3, renorm = False, I = 0, conserve_Jz = True, memmap_maps = True, memmap_tensors = True)
+    print(kwargs)
     d = pickle.load(open('configs.pkl','rb'))
     kwargs['r0_Rv'] = d['r0_Rv']
     kwargs['tgt_u0'] = None
     print(kwargs)
+    print(sys.argv)
     kwargs = unpack_script_args(sys.argv, **kwargs)
     print(kwargs)
     tc = time.time()
