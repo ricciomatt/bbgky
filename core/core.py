@@ -281,6 +281,8 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
                     GammaBar+=Gamma
                     PhiBar+=Phi
                     del Phi; del Gamma
+                    sys.path.remove(os.path.join(tmp_path,f'BBGKY{N}-{n}/Data/{i}_random_uniform/Gamma(t).npy'))
+                    sys.path.remove(os.path.join(tmp_path,f'BBGKY{N}-{n}/Data/{i}_random_uniform/Phi(t).npy'))
                     pbar.update(1)
                     gc.collect()
                 pbar.set_description(f"Computed {0}/{Nproc}")
@@ -291,31 +293,39 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
         with open(os.path.join(out_path,'Nshots.pkl'), 'rb') as file:
             try:
                 T = pickle.load(file)
+                rd = True
             except:
                 T = 0
+                rd = False
         
         PhiBar = torch.from_numpy(PhiBar.copy())
         GammaBar = torch.from_numpy(GammaBar.copy())
         print('Processing')
-        with open(os.path.join(out_path,'PhiBar.dat'), 'rb') as file:
-            try:
-                PhiBar += torch.load(file)*T
-            except:
-                pass
-        with open(os.path.join(out_path,'GammaBar.dat'), 'rb') as file:
-            try:
-                GammaBar += torch.load(file)*T
-            except:
-                pass
-        tot_proc+=T
-        PhiBar/=tot_proc
-        GammaBar/=tot_proc
+        if(rd):
+            with open(os.path.join(out_path,'PhiBar.dat'), 'rb') as file:
+                try:
+                    tempP = torch.load(file)*T
+                except:
+                    tempP = None
+            with open(os.path.join(out_path,'GammaBar.dat'), 'rb') as file:
+                try:
+                    tempG = torch.load(file)*T
+                except:
+                    tempG = None
+            if(tempP is not None and tempG is not None):
+                PhiBar += tempP*T
+                GammaBar += tempG * T
+                tot_proc+=T
+                PhiBar /= tot_proc
+                GammaBar /= tot_proc
+                del tempP; del tempG; del T
+                gc.collect()   
     else:
         os.makedirs(out_path)
         PhiBar = torch.from_numpy(PhiBar.copy())/tot_proc
         GammaBar = torch.from_numpy(GammaBar.copy())/tot_proc
     print(PhiBar, GammaBar)
-    with open(os.path.join(out_path,'Nshots.pkl'), 'wb') as file :
+    with open(os.path.join(out_path,'Nshots.pkl'), 'wb') as file:
         pickle.dump(tot_proc, file)
     with open(os.path.join(out_path, 'PhiBar.dat'), 'wb') as file: 
         torch.save(PhiBar,file) 
