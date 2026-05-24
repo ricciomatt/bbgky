@@ -179,36 +179,40 @@ def plot_non_local(
     xaxis5['domain'] =  (.575, 1)
     xaxis5['title'] = '$\\huge t(\\omega_{0}^{-1})$'
     xaxis5['anchor'] = 'y5'
+    xaxis5['tickfont'] = dict(size = 30)
     
     xaxis6 = copy.deepcopy(ax)
     xaxis6['domain'] =  (.575, 1)
     xaxis6['domain'] =  (.575, 1)
     xaxis6['title'] = r'$\huge \frac{p_{A}}{E_{0}}$'
     xaxis6['anchor'] = 'y6'
+    xaxis6['tickfont'] = dict(size = 30)
     
     yaxis5 = copy.deepcopy(ax)
     yaxis5['domain'] =  copy.copy(plt.layout['yaxis']['domain'])
     yaxis5['title'] = r'$\huge {S}_{2,(ABC)} $'
     yaxis5['anchor'] = 'x5'
+    yaxis5['tickfont'] = dict(size = 30)
     
     yaxis6 = copy.deepcopy(ax)
     yaxis6['domain'] =  copy.copy(plt.layout['yaxis2']['domain'])
     yaxis6['title'] = r'$\huge \frac{p_{A}}{E_{0}}$'
     yaxis6['anchor'] = 'x6'
+    yaxis6['tickfont'] = dict(size = 30)
     
     plt.update_layout(
         title =dict(text = 'Non Locality Indicators', font = dict(size = 40), x = 0), 
-        xaxis = dict(title = '$\\huge t(\\omega_{0}^{-1})$', domain = (0,.425)),
-        xaxis2 = dict(title = r'$\huge \frac{p_{A}}{E_{0}}$', domain = (0,.425) ),
-        xaxis3 = dict(title = '$\\huge t(\\omega_{0}^{-1})$'), 
-        xaxis4 = dict(title = '$\\huge t(\\omega_{0}^{-1})$'), 
+        xaxis = dict(title = '$\\huge t(\\omega_{0}^{-1})$', domain = (0,.425), tickfont = dict(size = 30)),
+        xaxis2 = dict(title = r'$\huge \frac{p_{A}}{E_{0}}$', domain = (0,.425),tickfont = dict(size = 30)),
+        xaxis3 = dict(title = '$\\huge t(\\omega_{0}^{-1})$',tickfont = dict(size = 30)), 
+        xaxis4 = dict(title = '$\\huge t(\\omega_{0}^{-1})$',tickfont = dict(size = 30)), 
         xaxis5 = xaxis5, 
         xaxis6 = xaxis6,
 
-        yaxis = dict(title = '$\\huge \\mathcal{I}_{2,(AB)}$'),
-        yaxis2=dict(title = r"$\huge \frac{p_{A}}{E_{0}}$"),
-        yaxis3 = dict(title = r'$\huge S_{2,(AB)} $'),
-        yaxis4 = dict(title = r'$\huge \mathcal{I}_{2,(AB:C)} $'),
+        yaxis = dict(title = '$\\huge \\mathcal{I}_{2,(AB)}$',tickfont = dict(size = 30)),
+        yaxis2=dict(title = r"$\huge \frac{p_{A}}{E_{0}}$",tickfont = dict(size = 30)),
+        yaxis3 = dict(title = r'$\huge S_{2,(AB)} $',tickfont = dict(size = 30)),
+        yaxis4 = dict(title = r'$\huge \mathcal{I}_{2,(AB:C)} $',tickfont = dict(size = 30)),
         yaxis5 = yaxis5,
         yaxis6 = yaxis6,
 
@@ -273,7 +277,7 @@ def plot_non_local(
         )
     )
     )
-    plt.update_layout(annotations = annotations )
+    plt.update_layout(annotations = annotations)
     print('Non-Local Made')
 
     if(to_image):
@@ -383,15 +387,15 @@ def plot_ptrans_dep(
             text = r'$\Huge \textbf{Dynamical  Phase  Transition  around  the  effective  Daul  Point}(\mu_{(t)} \sim |\bar{B}|)$',
             yref= 'paper', x=0, xref = 'paper'
         ),
-        yaxis = dict(title = dict(text = r"$\huge \mathcal{M}_{4,A}$")),
-        yaxis2= dict(title = dict(text = r"$\huge S_{2,A}$")),
-        yaxis3= dict(title = dict(text = r"$\huge \bar{\Phi}_{a}\bar{\Phi}^{a}$")),
-        yaxis4= dict(title = dict(text = r"$\huge E$")),
+        yaxis = dict(title = dict(text = r"$\huge \mathcal{M}_{4,A}$"), tickfont = dict(size = 30)),
+        yaxis2= dict(title = dict(text = r"$\huge S_{2,A}$"), tickfont = dict(size = 30)),
+        yaxis3= dict(title = dict(text = r"$\huge \bar{\Phi}_{a}\bar{\Phi}^{a}$"), tickfont = dict(size = 30)),
+        yaxis4= dict(title = dict(text = r"$\huge E$"), tickfont = dict(size = 30)),
 
-        xaxis = dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
-        xaxis2= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
-        xaxis3= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
-        xaxis4= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
+        xaxis = dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$"), tickfont = dict(size=30)),
+        xaxis2= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$"), tickfont = dict(size=30)),
+        xaxis3= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$"), tickfont = dict(size=30)),
+        xaxis4= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$"), tickfont = dict(size=30)),
         
         legend  = dict(title = dict(text = r"One-Body Magic"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
         legend2 = dict(title = dict(text = r"One-Body Entropy"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
@@ -417,7 +421,7 @@ def plot_flav(
     Pz = pmnsrotPhi(PhiBar, sun)[...,]
     GT = pmnsRotGamma(GammaBar, N, sun)
     plt.reset()
-    plt.subplot_grid(nrows = 2, ncols =1,spacingr=.05)
+    plt.subplot_grid(nrows = 2, ncols =1,spacingr=.075)
     color = ['rgba(255,0,0,.5)', 'rgba(0,0,255,.5)']
     color_Bar = ['rgb(0,0,0)', 'rgb(100,50,150)']
     dash = ['dot','dash']
@@ -429,13 +433,13 @@ def plot_flav(
                 x = t, y = Pz[...,i,k].real, 
                 marker=dict(color = color[m]), line = dict(width = 5), 
                 showlegend = bool(i<1), 
-                name = r'$\huge\Phi^{\text{Flavor}}_{A'+str(int(k))+'}$',legend = 'legend',
+                name = r'$\Huge\Phi^{\text{Flavor}}_{A'+str(int(k))+'}$',legend = 'legend',
             ) for i in range(N)
         ))
         plt.add_data(
             x = t, y = Pz[...,k].real.mean(-1), 
             marker=dict(color = color_Bar[m]), line = dict(width = 10, dash = dash[m]), 
-            showlegend = True, name = r'$\huge\bar{\Phi}^{\text{Flavor}}_{'+str(int(k))+'}$',legend = 'legend',
+            showlegend = True, name = r'$\Huge\bar{\Phi}^{\text{Flavor}}_{'+str(int(k))+'}$',legend = 'legend',
         )
 
         IX = A.filter(pl.col('a').__eq__(k-1) & pl.col('b').__eq__(k-1)).collect().sample(Nsamp)['AaBb']
@@ -445,25 +449,25 @@ def plot_flav(
                 x = t, y = GT[...,i].real, 
                 marker=dict(color = color[m]), line = dict(width = 5), 
                 showlegend = bool(j<1), xaxis = 'x2', yaxis = 'y2',
-                name =r'$\huge\Gamma^{\text{Flavor}}_{A'+str(int(k))+'B'+str(int(k))+'}$' ,legend = 'legend2',
+                name =r'$\Huge\Gamma^{\text{Flavor}}_{A'+str(int(k))+'B'+str(int(k))+'}$' ,legend = 'legend2',
             ) for j,i in enumerate(IX)
         ))
         plt.add_data(
             x = t, y = GT[:, A.filter(pl.col('a').__eq__(k-1) & pl.col('b').__eq__(k-1)).collect()['AaBb']].real.mean(-1), 
             marker=dict(color = color_Bar[m]), line = dict(width = 10, dash = dash[m]), xaxis = 'x2', yaxis = 'y2',legend = 'legend2',
-            showlegend = True, name = r'$\huge\bar{\Gamma}^{\text{Flavor}}_{'+str(int(k))+''+str(int(k))+'}$'
+            showlegend = True, name = r'$\Huge\bar{\Gamma}^{\text{Flavor}}_{'+str(int(k))+''+str(int(k))+'}$'
         )
     
     plt.update_layout(
-        xaxis = dict(title = dict(text = r'$\huge {t(\omega_{0}^{-1})}$')),
-        xaxis2 = dict(title = dict(text = r'$\huge {t(\omega_{0}^{-1})}$')),
-        yaxis = dict(title = dict(text = r"$\huge \Phi_{A\mathfrak{d}}^{\text{Flavor}}$")),
-        yaxis2 = dict(title = dict(text = r"$\huge \Gamma_{A\mathfrak{d}B\mathfrak{d}}^{\text{Flavor}}$")),
-        legend  = dict(title = dict(text = r'One-Body Flavor<br>Population Evolution'), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
-        legend2 = dict(title = dict(text = r"Two-Body Flavor<br>Population Evolution"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+        xaxis = dict(title = dict(text = r'$\Huge {t(\omega_{0}^{-1})}$'), tickfont = dict(size = 30)),
+        xaxis2 = dict(title = dict(text = r'$\Huge {t(\omega_{0}^{-1})}$'), tickfont = dict(size = 30)),
+        yaxis = dict(title = dict(text = r"$\Huge \Phi_{A\mathfrak{d}}^{\text{Flavor}}$"), tickfont = dict(size = 30)),
+        yaxis2 = dict(title = dict(text = r"$\Huge \Gamma_{A\mathfrak{d}B\mathfrak{d}}^{\text{Flavor}}$"), tickfont = dict(size = 30)),
+        legend  = dict(title = dict(text = r''), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
+        legend2 = dict(title = dict(text = r""), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
         
         title = dict(text = r"$\Huge \textbf{Flavor Population Evolution}$"),
-        height = 1500,
+        height = 2000,
     )
     print('Rendering...')
     if(to_image):
@@ -571,14 +575,14 @@ def plot_ptrans(
             text = r'$\Huge \textbf{Dynamical  Phase  Transition  around  the  effective  Daul  Point}(\mu_{(t)} \sim |\bar{B}|)$',
             yref= 'paper', x=0, xref = 'paper'
         ),
-        yaxis = dict(title = dict(text = r"$\huge {S}_{2,A}$")),
-        yaxis2= dict(title = dict(text = r"$\huge\bar{\Phi}^a \bar{\Phi}_{a}$")),
-        yaxis3= dict(title = dict(text = r"$\huge E$")),
+        yaxis = dict(title = dict(text = r"$\huge {S}_{2,A}$"), tickfont=dict(size = 20)),
+        yaxis2= dict(title = dict(text = r"$\huge\bar{\Phi}^a \bar{\Phi}_{a}$"), tickfont=dict(size = 20)),
+        yaxis3= dict(title = dict(text = r"$\huge E$"), tickfont=dict(size = 20)),
         
         
-        xaxis = dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
-        xaxis2= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
-        xaxis3= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
+        xaxis = dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$"), tickfont=dict(size = 20)),
+        xaxis2= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$"), tickfont=dict(size = 20)),
+        xaxis3= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$"), tickfont=dict(size = 20)),
         
         legend  = dict(title = dict(text = r"One-Body Magic"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
         legend2 = dict(title = dict(text = r"One-Body Entropy"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
@@ -612,7 +616,7 @@ def plot_magic_mana(
                 x = t, y =  M2[:,i],
                 xaxis = 'x3', yaxis = 'y3', legend = 'legend3',
                 line = dict(width = 10, dash = 'solid'), marker = dict(color = 'rgba(255,0,0,.25)',),
-                showlegend = bool(i == 0), name = '$\\huge \\mathscr{M}_{2,A}$', 
+                showlegend = bool(i == 0), name = '$\\Huge \\mathscr{M}_{2,A}$', 
                 
             ) for i in range(N)
         )
@@ -621,17 +625,17 @@ def plot_magic_mana(
         x = t, y=  M2[:,].mean(-1),
         xaxis = 'x3', yaxis = 'y3', legend = 'legend3',
         line = dict(width = 7.5, dash='solid'), marker=dict(color='black'),
-        showlegend = True, name = '$\\huge \\bar{\\mathscr{M}}_{2,A}$', 
+        showlegend = True, name = '$\\Huge \\bar{\\mathscr{M}}_{2,A}$', 
     )
-
-    M2 = oneBodyMana(PhiBar.clone(),).log()
+    
+    M2 = oneBodyMana(PhiBar.clone(),)
     
     plt.extend_data(*(
             dict(
                 x = t, y =  M2[:,i],
                 xaxis = 'x', yaxis = 'y', legend = 'legend',
                 line = dict(width = 10, dash = 'solid'), marker = dict(color = 'rgba(255,0,0,.25)',),
-                showlegend = bool(i == 0), name = '$\\huge \\mathcal{M}_{A}$', 
+                showlegend = bool(i == 0), name = '$\\Huge \\mathcal{M}_{A}$', 
                 
             ) for i in range(N )
         )
@@ -640,7 +644,7 @@ def plot_magic_mana(
         x = t, y=  M2[:,].mean(-1),
         xaxis = 'x', yaxis = 'y', legend = 'legend',
         line = dict(width = 7.5, dash='solid'), marker=dict(color='black'),
-        showlegend = True, name = '$\\huge \\bar{\\mathcal{M}}_{A}$'
+        showlegend = True, name = '$\\Huge \\bar{\\mathcal{M}}_{A}$'
     )
 
    #two Body
@@ -651,7 +655,7 @@ def plot_magic_mana(
                 x = t, y =  M2[:,i].real,
                 xaxis = 'x4', yaxis = 'y4', legend = 'legend4',
                 line = dict(width = 10, dash = 'solid'), marker = dict(color = 'rgba(255,0,0,.25)',),
-                showlegend = bool(j == 0), name = '$\\huge \\mathscr{M}_{2,AB}$', 
+                showlegend = bool(j == 0), name = '$\\Huge \\mathscr{M}_{2,AB}$', 
                 
             ) for j,i in enumerate(IX)
         )
@@ -660,7 +664,7 @@ def plot_magic_mana(
         x = t, y=  M2[:,].mean(-1).real,
         xaxis = 'x4', yaxis = 'y4', legend = 'legend4',
         line = dict(width = 7.5, dash='solid'), marker=dict(color='black'),
-        showlegend = True, name = '$\\huge \\bar{\\mathscr{M}}_{2,AB}$', 
+        showlegend = True, name = '$\\Huge \\bar{\\mathscr{M}}_{2,AB}$', 
     )
     M2, _ = twoBodyMana(PhiBar.clone(), GammaBar.clone(), sun, ret_map=True)
     
@@ -669,7 +673,7 @@ def plot_magic_mana(
                 x = t, y =  M2[:,i].real,
                 xaxis = 'x2', yaxis = 'y2', legend = 'legend2',
                 line = dict(width = 10, dash = 'solid'), marker = dict(color = 'rgba(255,0,0,.25)',),
-                showlegend = bool(j == 0), name = '$\\huge \\mathcal{M}_{AB}$', 
+                showlegend = bool(j == 0), name = '$\\Huge \\mathcal{M}_{AB}$', 
                 
             ) for j,i in enumerate(IX)
         )
@@ -678,13 +682,13 @@ def plot_magic_mana(
         x = t, y=  M2[:,].mean(-1).real,
         xaxis = 'x2', yaxis = 'y2', legend = 'legend2',
         line = dict(width = 7.5, dash='solid'), marker=dict(color='black'),
-        showlegend = True, name = '$\\huge \\bar{\\mathcal{M}}_{AB}$'
+        showlegend = True, name = '$\\Huge \\bar{\\mathcal{M}}_{AB}$'
     )
     titles = {
-        '4':r'$\huge\textbf{Two-Body Magic}$', 
-        '3':r'$\huge\textbf{One-Body Magic}$', 
-        '2':r'$\huge\textbf{Two-Body Mana}$',
-        '':r'$\huge\textbf{One-Body Mana}$',
+        '4':r'$\Huge\textbf{Two-Body Magic}$', 
+        '3':r'$\Huge\textbf{One-Body Magic}$', 
+        '2':r'$\Huge\textbf{Two-Body Mana}$',
+        '':r'$\Huge\textbf{One-Body Mana}$',
     } 
     annotations = [
         dict(
@@ -706,15 +710,15 @@ def plot_magic_mana(
             text = r'$\Huge \textbf{Non-Stabalizer Resources Present in Simulation)$',
             yref= 'paper', x=0, xref = 'paper'
         ),
-        yaxis3 = dict(title = dict(text = r"$\huge \mathcal{M}_{A}$")),
-        yaxis4= dict(title = dict(text = r"$\huge \mathcal{M}_{AB}$")),
-        yaxis= dict(title = dict(text = r"$\huge \mathscr{M}_{2A}$")),
-        yaxis2= dict(title = dict(text = r"$\huge \mathscr{M}_{2AB}$")),
+        yaxis3 = dict(title = dict(text = r"$\Huge \mathcal{M}_{A}$"), tickfont=dict(size = 25)),
+        yaxis4= dict(title = dict(text = r"$\Huge \mathcal{M}_{AB}$"), tickfont=dict(size = 25)),
+        yaxis= dict(title = dict(text = r"$\Huge \mathscr{M}_{2A}$"), tickfont=dict(size = 25)), 
+        yaxis2= dict(title = dict(text = r"$\Huge \mathscr{M}_{2AB}$"), tickfont=dict(size = 25)),
 
-        xaxis = dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
-        xaxis2= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
-        xaxis3= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
-        xaxis4= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$")),
+        xaxis = dict(title = dict(text = r"$\Huge t(\omega_{0}^{-1})$"), tickfont= dict(size= 25)),
+        xaxis2= dict(title = dict(text = r"$\Huge t(\omega_{0}^{-1})$"), tickfont= dict(size= 25)),
+        xaxis3= dict(title = dict(text = r"$\Huge t(\omega_{0}^{-1})$"), tickfont= dict(size= 25)),
+        xaxis4= dict(title = dict(text = r"$\Huge t(\omega_{0}^{-1})$"), tickfont= dict(size= 25)),
         
         legend  = dict(title = dict(text = r"One-Body Mana"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
         legend2 = dict(title = dict(text = r"Two-Body Mana"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
@@ -729,5 +733,6 @@ def plot_magic_mana(
     if(to_image):
         plt.to_image(os.path.join(plot_path, 'MagicMana.png'))
         return 
+        
     else:
         return plt
