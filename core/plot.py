@@ -16,6 +16,7 @@ from qunum.numerical.physics.quantum.heisenberg.bbgky_truncation.core.qi import 
 def plot_non_local(
     PhiBar:torch.Tensor, GammaBar:torch.Tensor, t:torch.Tensor, pMag:torch.Tensor, 
     plot_path:str, sun:SUConnection, lfs:dict[str:pl.LazyFrame], plt:PlotIt, to_image:bool = True,
+    **kwargs
 )->None|PlotIt:
     NSamp = 200
     N = 100
@@ -218,7 +219,7 @@ def plot_non_local(
 
         
 
-        height = 3500
+        height = 3000, width = 2000,
 
     )
     legends = dict(
@@ -278,6 +279,7 @@ def plot_non_local(
     )
     )
     plt.update_layout(annotations = annotations)
+    plt.update_layout(**kwargs)
     print('Non-Local Made')
 
     if(to_image):
@@ -289,7 +291,8 @@ def plot_non_local(
 def plot_ptrans_dep(
         PhiBar:torch.Tensor, tfact:float, t:torch.Tensor, 
         plot_path:str, sun:SUConnection, B:LazyTensor,
-        plt:PlotIt, u:LazyTensor, N:int, to_image:bool = True
+        plt:PlotIt, u:LazyTensor, N:int, to_image:bool = True,
+        **kwargs
     )->None|PlotIt:
     
     plt.reset()
@@ -407,7 +410,7 @@ def plot_ptrans_dep(
     
         
     )
-
+    plt.update_layout(**kwargs)
     if(to_image):
         plt.to_image(os.path.join(plot_path, 'PhaseTransition.png'))
         return 
@@ -416,7 +419,8 @@ def plot_ptrans_dep(
 
 def plot_flav(
         PhiBar:torch.Tensor, GammaBar:torch.Tensor, sun:SUConnection, plt:PlotIt, t:torch.Tensor , path_base:str, N:int, to_image:bool = True, 
-        Nsamp:int = 200
+        Nsamp:int = 200, 
+        **kwargs
     )->None|PlotIt:
     Pz = pmnsrotPhi(PhiBar, sun)[...,]
     GT = pmnsRotGamma(GammaBar, N, sun)
@@ -469,6 +473,7 @@ def plot_flav(
         title = dict(text = r"$\Huge \textbf{Flavor Population Evolution}$"),
         height = 2000,
     )
+    plt.update_layout(**kwargs )
     print('Rendering...')
     if(to_image):
         plt.to_image(os.path.join(path_base, 'Pz.png'))
@@ -479,7 +484,8 @@ def plot_flav(
 def plot_ptrans(
         PhiBar:torch.Tensor, tfact:float, t:torch.Tensor, 
         plot_path:str, sun:SUConnection, B:LazyTensor,
-        plt:PlotIt, u:LazyTensor, N:int, to_image:bool = True
+        plt:PlotIt, u:LazyTensor, N:int, to_image:bool = True,
+        **kwargs
     )->None|PlotIt:
     
     plt.reset()
@@ -593,6 +599,7 @@ def plot_ptrans(
     
         
     )
+    plt.update_layout(**kwargs)
 
     if(to_image):
         plt.to_image(os.path.join(plot_path, 'PhaseTransition.png'))
@@ -604,7 +611,8 @@ def plot_ptrans(
 def plot_magic_mana(
         PhiBar:torch.Tensor, GammaBar:torch.Tensor, t:torch.Tensor, 
         plot_path:str, sun:SUConnection,
-        plt:PlotIt, N:int, to_image:bool = True, Nsamp:int = 200
+        plt:PlotIt, N:int, to_image:bool = True, Nsamp:int = 200,
+        **kwargs
     )->None|PlotIt:
     
     plt.reset()
@@ -729,6 +737,7 @@ def plot_magic_mana(
     
         
     )
+    plt.update_layout(**kwargs)
     print('Rendering')
     if(to_image):
         plt.to_image(os.path.join(plot_path, 'MagicMana.png'))
