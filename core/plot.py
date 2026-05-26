@@ -278,7 +278,7 @@ def plot_non_local(
         )
     )
     )
-    plt.update_layout(annotations = annotations)
+    plt.update_layout(annotations = annotations, height = 5000, width = 2000)
     plt.update_layout(**kwargs)
     print('Non-Local Made')
 
@@ -471,7 +471,7 @@ def plot_flav(
         legend2 = dict(title = dict(text = r""), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
         
         title = dict(text = r"$\Huge \textbf{Flavor Population Evolution}$"),
-        height = 2000,
+        height = 5000/6*2, width = 2000
     )
     plt.update_layout(**kwargs )
     print('Rendering...')
@@ -576,7 +576,7 @@ def plot_ptrans(
         for tit in titles
     ]
     plt.update_layout(
-        height = 2500, width = 2000, 
+        height = 5000/6*3, width = 2000, 
         title = dict(
             text = r'$\Huge \textbf{Dynamical  Phase  Transition  around  the  effective  Daul  Point}(\mu_{(t)} \sim |\bar{B}|)$',
             yref= 'paper', x=0, xref = 'paper'
@@ -585,10 +585,9 @@ def plot_ptrans(
         yaxis2= dict(title = dict(text = r"$\huge\bar{\Phi}^a \bar{\Phi}_{a}$"), tickfont=dict(size = 20)),
         yaxis3= dict(title = dict(text = r"$\huge E$"), tickfont=dict(size = 20)),
         
-        
         xaxis = dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$"), tickfont=dict(size = 20)),
-        xaxis2= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$"), tickfont=dict(size = 20)),
-        xaxis3= dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$"), tickfont=dict(size = 20)),
+        xaxis2 = dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$"), tickfont=dict(size = 20)),
+        xaxis3 = dict(title = dict(text = r"$\huge t(\omega_{0}^{-1})$"), tickfont=dict(size = 20)),
         
         legend  = dict(title = dict(text = r"One-Body Magic"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
         legend2 = dict(title = dict(text = r"One-Body Entropy"), font = dict(size = 28), xanchor = 'left', itemwidth=85, bordercolor="black", borderwidth=3),
@@ -713,7 +712,7 @@ def plot_magic_mana(
     ]
     
     plt.update_layout(
-        height = 2500, width = 2000, 
+        height = 5000/6 * 4, width = 2000, 
         title = dict(
             text = r'$\Huge \textbf{Non-Stabalizer Resources Present in Simulation)$',
             yref= 'paper', x=0, xref = 'paper'
