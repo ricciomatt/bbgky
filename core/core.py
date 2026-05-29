@@ -292,7 +292,7 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
                     GammaBar+=Gamma
                     PhiBar+=Phi
                     del Phi; del Gamma
-                    shutil.copyfile(os.path.join(tmp_path, f'BBGKY{N}-{n}/Data/{i}_random_uniform/configs.pkl'), os.path.join(out_path, 'configs', f'{n_complete}_configs.pkl'))
+                    shutil.copyfile(os.path.join(tmp_path, f'BBGKY{N}-{n}/Data/{i}_random_uniform/configs.pkl'), os.path.join(out_path, f'configs{N}-{n}', f'{n_complete-(Nproc-i)}_configs.pkl'))
                     shutil.rmtree(os.path.join(tmp_path,f'BBGKY{N}-{n}/Data/{i}_random_uniform'))
                     pbar.update(1)
                     gc.collect()
