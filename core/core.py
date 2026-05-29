@@ -262,7 +262,7 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
     out_path = os.path.join(tgt_path, 'data')
     os.makedirs(out_path, exist_ok= True)
     try: 
-        os.mkdir(os.path.join(out_path, 'configs'))
+        os.mkdir(os.path.join(out_path, f'configs{N}-{n}'))
     except:
         pass
     n_complete = 0

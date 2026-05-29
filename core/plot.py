@@ -610,7 +610,6 @@ def plot_ptrans(
     else:
         return plt
 
-
 def plot_magic_mana(
         PhiBar:torch.Tensor, GammaBar:torch.Tensor, t:torch.Tensor, 
         plot_path:str, sun:SUConnection,
