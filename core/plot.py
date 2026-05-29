@@ -68,7 +68,7 @@ def plot_non_local(
 
     NSamp2 = 300
     plt.reset()
-    plt.subplot_grid(ncols=1, nrows=4, spacingr=.05, leg_opts=dict(bordercolor="black", borderwidth=1))
+    plt.subplot_grid(ncols=1, nrows=4, spacingr=.05, )
 
     #2 Body Mudual Information
     plt.extend_data(
@@ -233,7 +233,10 @@ def plot_non_local(
     for tit in set({'', '2','3','4','5','6'}):
         legends[f'legend{tit}']['y'] = plt.layout[f'yaxis{tit}']['domain'][1]
         legends[f'legend{tit}']['x'] = plt.layout[f'xaxis{tit}']['domain'][1]
+    print('bordercolor' in plt.layout)
     plt.update_layout(**legends)
+    
+    print('bordercolor' in plt.layout)
     titles = {
         '6':r'$\huge\text{{Two  Body  Entropy  Heat  Map}}(t(\omega_{{0}}^{{-1}})={t})$'.format(t = int(t[i])), 
         '4':r'$\huge\text{Three Body Entropy}$', 
@@ -278,7 +281,8 @@ def plot_non_local(
         )
     )
     )
-    plt.update_layout(annotations = annotations, height = 5000, width = 2000)
+    print('bordercolor' in plt.layout)
+    plt.update_layout(annotations = annotations)
     plt.update_layout(**kwargs)
     print('Non-Local Made')
 
@@ -744,3 +748,6 @@ def plot_magic_mana(
         
     else:
         return plt
+
+
+

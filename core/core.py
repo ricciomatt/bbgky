@@ -259,7 +259,12 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
         D = N*(pow(n,2)-1)
         GammaBar = np.memmap(os.path.join(data_path, 'GammaBar.dat'), shape =(Nsteps, int(pow(D,2)*(1-1/N)/2)), dtype = np.float64, mode='w+')
     print(f"Starting {tot_proc} jobs using {Nproc} workers with {max_cores} cores per worker...")
-
+    out_path = os.path.join(tgt_path, 'data')
+    os.makedirs(out_path, exist_ok= True)
+    try: 
+        os.mkdir(os.path.join(out_path, 'configs'))
+    except:
+        pass
     n_complete = 0
     print(Nsteps, n, GammaBar.shape, PhiBar.shape)
     with tqdm.tqdm(total=tot_proc, desc=f"Computed 0/{Nproc}", unit="job", ncols=75,) as pbar:
@@ -287,6 +292,7 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
                     GammaBar+=Gamma
                     PhiBar+=Phi
                     del Phi; del Gamma
+                    shutil.copyfile(os.path.join(tmp_path, f'BBGKY{N}-{n}/Data/{i}_random_uniform/configs.pkl'), os.path.join(out_path, 'configs', f'{n_complete}_configs.pkl'))
                     shutil.rmtree(os.path.join(tmp_path,f'BBGKY{N}-{n}/Data/{i}_random_uniform'))
                     pbar.update(1)
                     gc.collect()
@@ -294,24 +300,33 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
     print('\nCompleted all iterations. Storing Data')
     out_path = os.path.join(tgt_path, 'data')
     if(os.path.exists(out_path)):
-        os.makedirs(out_path, exist_ok= True)
-        with open(os.path.join(out_path,f'Nshots{N}-{n}.pkl'), 'rb') as file:
-            try:
-                T = pickle.load(file)
-                rd = True
-            except:
-                T = 0
-                rd = False
-        
+        #os.makedirs(out_path, exist_ok= True)
+        file_tree = glob.glob(f'{out_path}/*')
+        if(os.path.join(out_path,f'Nshots{N}-{n}.pkl') in file_tree):
+            with open(os.path.join(out_path,f'Nshots{N}-{n}.pkl'), 'rb') as file:
+                try:
+                    T = pickle.load(file)
+                    rd = True
+                except:
+                    T = 0
+                    rd = False
+        else:
+            T = 0 
+            rd = False
+        tot_proc += T
         PhiBar = torch.from_numpy(PhiBar.copy())
         GammaBar = torch.from_numpy(GammaBar.copy())
-        print('Processing')
-        if(rd):
+        if(rd and os.path.join(out_path,f'PhiBar{N}-{n}.dat') in file_tree ):
             with open(os.path.join(out_path,f'PhiBar{N}-{n}.dat'), 'rb') as file:
                 try:
                     tempP:Tensor = torch.load(file)*T
                 except:
                     tempP = None
+            if(tempP is not None):
+                print(tempP.shape, tempG.shape)
+                PhiBar += tempP*T
+                PhiBar /= tot_proc
+        if(rd and os.path.join(out_path,f'PhiBar{N}-{n}.dat') in file_tree ):
             with open(os.path.join(out_path,f'GammaBar{N}-{n}.dat'), 'rb') as file:
                 try:
                     tempG:Tensor = torch.load(file)*T
@@ -319,18 +334,14 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
                     tempG = None
             if(tempP is not None and tempG is not None):
                 print(tempP.shape, tempG.shape)
-                PhiBar += tempP*T
                 GammaBar += tempG * T
-                tot_proc+=T
-                PhiBar /= tot_proc
                 GammaBar /= tot_proc
-                del tempP; del tempG; del T
-                gc.collect()   
+        del tempP; del tempG; del T
+        gc.collect()
     else:
-        os.makedirs(out_path)
+        os.makedirs(out_path, exist_ok=True)
         PhiBar = torch.from_numpy(PhiBar.copy())/tot_proc
         GammaBar = torch.from_numpy(GammaBar.copy())/tot_proc
-    print(PhiBar, GammaBar)
     with open(os.path.join(out_path,f'Nshots{N}-{n}.pkl'), 'wb') as file:
         pickle.dump(tot_proc, file)
     with open(os.path.join(out_path, f'PhiBar{N}-{n}.dat'), 'wb') as file: 
