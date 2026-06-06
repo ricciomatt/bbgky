@@ -1,1 +1,1 @@
-from .core import mk_obj, unpack_script_args
+from .core import mk_obj, unpack_script_args, load__obj

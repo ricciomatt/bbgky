@@ -8,7 +8,12 @@ from torch import Tensor
 import pickle, gc, shutil
 from threading import BoundedSemaphore
 
-def mk_obj(tgt_path:str|None = None, N:int = 100, n:int = 100, I:int = 0, r0_Rv:float = 7.5, angular_dependence = 'random_uniform', map_loc:str|None = None, load_map:bool = True, **kwargs)->BBGKY:
+def load__obj(N:int, n:int, tgt_path:str, maps_loc:str|None = None,**kwargs )->BBGKY:
+    return BBGKY( N, n,
+        data_storage_loc=tgt_path, maps_loc=maps_loc, load_maps = True, load_data=True, memmap_maps=False
+    )
+
+def mk_obj(tgt_path:str|None = None, N:int = 100, n:int = 2, I:int = 0, r0_Rv:float = 7.5, angular_dependence = 'random_uniform', map_loc:str|None = None, load_map:bool = True, **kwargs)->BBGKY:
     if(tgt_path is None):
         tgt_path = os.getcwd()
     a = dict(
@@ -83,7 +88,6 @@ def load_obj(
         timeit=True,
         **a
     )
-
 
 def run_job(n:int = 2, N:int = 100, Nsteps:int = 5000, sl_time:float = 60, Nproc:int = 5, tot_proc:int = 100, **kwargs):
     print(N,n,sl_time)
@@ -180,7 +184,6 @@ def unpack_script_args(inp_args:list[str], **kwargs:dict[str:Any])->dict[str:Any
         else:
             kwargs[key] = pat_match(val, key)
     return kwargs
-
 
 def run_single_job(args:tuple[int, int, int, int, str, str, dict]):
     n, N, Nsteps, i, max_cores, path, tgt_path, kwargs = args
@@ -323,19 +326,23 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
                 except:
                     tempP = None
             if(tempP is not None):
-                print(tempP.shape, tempG.shape)
+                tempP.shape
                 PhiBar += tempP*T
                 PhiBar /= tot_proc
+        else:
+            tempP = None
         if(rd and os.path.join(out_path,f'PhiBar{N}-{n}.dat') in file_tree ):
             with open(os.path.join(out_path,f'GammaBar{N}-{n}.dat'), 'rb') as file:
                 try:
                     tempG:Tensor = torch.load(file)*T
                 except:
                     tempG = None
-            if(tempP is not None and tempG is not None):
+            if(tempG is not None):
                 print(tempP.shape, tempG.shape)
                 GammaBar += tempG * T
                 GammaBar /= tot_proc
+        else:
+            tempG = None
         del tempP; del tempG; del T
         gc.collect()
     else:

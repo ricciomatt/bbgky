@@ -748,5 +748,3 @@ def plot_magic_mana(
     else:
         return plt
 
-
-
