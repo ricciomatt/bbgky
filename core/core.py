@@ -238,12 +238,12 @@ def run_job_cums(tgt_path:None|str=None, log_path:str|None = None, n:int=2, N:in
             os.makedirs(tmp_path)
     if(log_path is None):
         log_path = os.getcwd()
+        path = os.path.join(log_path, 'logs')
     else:
-        os.path.join(log_path,'temp')
-        if(not os.path.exists(tgt_path)):
-            print(tgt_path)
-            os.makedirs(tgt_path)
-    path = os.path.join(log_path, 'logs')
+        path = log_path
+    if(not os.path.exists(tgt_path)):
+        os.makedirs(tgt_path)
+    
     if not os.path.exists(path):
         os.makedirs(path)
     # Prepare task arguments
